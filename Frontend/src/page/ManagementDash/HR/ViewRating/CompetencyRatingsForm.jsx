@@ -181,15 +181,6 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
             className="border p-2 rounded"
           />
 
-          <input
-            type="text"
-            name="ratedByEmployeeId"
-            placeholder="Rated By"
-            value={formData.ratedByEmployeeId}
-            className="border p-2 rounded bg-gray-100 cursor-not-allowed"
-            readOnly
-          />
-
           <textarea
             name="feedback"
             placeholder="Feedback"

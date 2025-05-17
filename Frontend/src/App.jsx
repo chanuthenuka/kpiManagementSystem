@@ -1,12 +1,16 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "../src/page/Auth/Login/Login";
-import ForgotPassowrd from "./page/Auth/Password/ForgotPassowrd";
 import { Outlet } from "react-router-dom";
+
+//dashboard
 import Body from "./components/Body/Body";
 import NavbarPos from "./components/Dash/Navbar/NavbarPos";
 
+//auth
+import Login from "../src/page/Auth/Login/Login";
+import ForgotPassowrd from "./page/Auth/Password/ForgotPassowrd";
+
 // HR
-import View_rating from "./page/ManagementDash/HR/ViewRanting/View_rating";
+import View_rating from "./page/ManagementDash/HR/ViewRating/View_rating";
 import Manage_KPIs from "./page/ManagementDash/HR/ManageKPI/ManageKPI";
 import Manage_KRAs from "./page/ManagementDash/HR/ManageKRA/ManageKRA";
 import ManageCompetenice from "./page/ManagementDash/HR/ManageCompetencie/Manage_Competencie";
@@ -43,8 +47,7 @@ import KPIQuarterly from "./page/ManagementDash/Manager/Rating/KPIQuarterly";
 
 // Layout for other pages (Navbar only)
 const MainLayout = () => (
-  <>
-    <NavbarPos />
+  <>    
     <Body />
     <Outlet />
   </>
@@ -83,10 +86,11 @@ function App() {
 
         {/* Other pages with Navbar only */}
         <Route path="/" element={<MainLayout />}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="/fgtpassword" element={<ForgotPassowrd />}></Route>
+
 
         <Route element={<HRLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/fgtpassword" element={<ForgotPassowrd />} />
           <Route path="/view-rating" element={<Manager_EMP />} />
           <Route
             path="/view_rating_card/:employeeId"
@@ -102,8 +106,6 @@ function App() {
         </Route>
 
         <Route element={<HODLayout />}>
-          <Route path="/login" element={<Login />} />
-
           <Route path="/hod-emp" element={<HOD_EMP />} />
           <Route path="/hod-ratingApproval" element={<HOD_RatingApprovals />} />
           <Route path="/hod-kpichanges" element={<HOD_KPIChanges />} />
@@ -118,14 +120,10 @@ function App() {
         </Route>
 
         <Route element={<ManagerLayout />}>
-          <Route path="/login" element={<Login />} />
-
           <Route path="/manager-emp" element={<View_rating />} />
         </Route>
 
         <Route element={<EmpLayout />}>
-          <Route path="/login" element={<Login />} />
-
           <Route path="/emp-emp" element={<EMP_EMP />} />
           <Route path="/on-rate" element={<OnRatings />} />
 

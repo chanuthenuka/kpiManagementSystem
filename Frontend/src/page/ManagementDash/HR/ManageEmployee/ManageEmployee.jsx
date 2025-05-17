@@ -285,7 +285,7 @@ const ManageEMPs = () => {
                   />
                 </div>
 
-                {/* Contact Details */}
+                {/* Login Details */}
                 <div className="bg-gray-50 p-6 rounded-xl shadow-inner border space-y-6">
                   <h2 className="text-xl font-semibold text-gray-800">
                     Login Details
@@ -299,7 +299,7 @@ const ManageEMPs = () => {
                     className="input-style"
                   />
                   <input
-                    type="text"
+                    type="password"
                     placeholder="Password"
                     name="contact"
                     value={formData.contact}

@@ -284,32 +284,7 @@ const HodRatingApprovals = () => {
             </div>
           )}
 
-          {/* History Table with Filters */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-              Approval History
-            </h2>
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-              <input
-                type="text"
-                placeholder="Filter by name..."
-                value={historyNameFilter}
-                onChange={(e) => setHistoryNameFilter(e.target.value)}
-                className="w-full sm:w-48 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-lg bg-gray-100 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
-              />
-              <select
-                value={historyManagerFilter}
-                onChange={(e) => setHistoryManagerFilter(e.target.value)}
-                className="w-full sm:w-48 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-lg bg-gray-100 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
-                {managers.map((manager) => (
-                  <option key={manager} value={manager}>
-                    {manager === "all" ? "All Managers" : manager}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          
 
           <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow-md">
             <table className="min-w-full divide-y divide-gray-200">

@@ -7,7 +7,7 @@ const KPIRatingsForm = ({ selectedUser }) => {
   const [error, setError] = useState("");
   const [kpiOptions, setKpiOptions] = useState([]);
   const [selectedYear, setSelectedYear] = useState("2025"); // Default to current year
-  const[extraRating, setExtraRating] = useState("");
+  const [extraRating, setExtraRating] = useState("");
 
   const loggedInEmployeeId = localStorage.getItem("employeeId");
   const years = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"];
@@ -24,7 +24,7 @@ const KPIRatingsForm = ({ selectedUser }) => {
         const filteredKpis = response.data.filter(
           (kpi) => kpi.year === selectedYear || !selectedYear
         );
-        console.log(filteredKpis)
+        console.log(filteredKpis);
         setKpiOptions(filteredKpis);
       } catch (err) {
         console.error("Failed to fetch KPI data:", err);
@@ -184,7 +184,7 @@ const KPIRatingsForm = ({ selectedUser }) => {
               onChange={(e) => updateRating(index, "target", e.target.value)}
               className="border p-2 rounded"
             />
-            
+
             <input
               type="text"
               placeholder="Tasks"
@@ -200,7 +200,10 @@ const KPIRatingsForm = ({ selectedUser }) => {
             >
               <option value="">Select Month</option>
               {Array.from({ length: 12 }, (_, i) => {
-                const month = `${selectedYear}-${String(i + 1).padStart(2, "0")}`;
+                const month = `${selectedYear}-${String(i + 1).padStart(
+                  2,
+                  "0"
+                )}`;
                 return (
                   <option key={month} value={month}>
                     {new Date(`${month}-01`).toLocaleString("default", {
@@ -212,26 +215,18 @@ const KPIRatingsForm = ({ selectedUser }) => {
             </select>
             <input
               type="number"
-              placeholder="Rating"
+              placeholder="Rating (Out of 100)"
               value={rating.rating}
-              onChange={(e) => updateRating(index, "rating", e.target.value)}
-              className="border p-2 rounded"
-            />
-            <input
-              type="number"
-              placeholder="Extra Rating"
-              value={rating.extraRating}
-              onChange={(e) => updateRating(index, "extraRating", e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow only integers ≤ 100
+                if (/^\d*$/.test(value) && Number(value) <= 100) {
+                  updateRating(index, "rating", value);
+                }
+              }}
               className="border p-2 rounded"
             />
 
-            <input
-              type="text"
-              placeholder="Rated By (Your Employee ID)"
-              value={rating.ratedByEmployeeId}
-              readOnly
-              className="border p-2 rounded bg-gray-100 cursor-not-allowed"
-            />
             <textarea
               placeholder="Feedback"
               value={rating.feedback}
@@ -242,7 +237,6 @@ const KPIRatingsForm = ({ selectedUser }) => {
         </div>
       ))}
       <div className="flex gap-2">
-        
         <button
           onClick={handleSubmit}
           className="bg-black text-white px-4 py-2 rounded"

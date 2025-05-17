@@ -14,6 +14,19 @@ const Sidebar = () => {
     }
   }, []);
 
+  const [roleId, setRoleId] = useState(localStorage.getItem("roleId"));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const storedRoleId = localStorage.getItem("roleId");
+      if (storedRoleId !== roleId) {
+        setRoleId(storedRoleId);
+      }
+    }, 500); // check every 0.5 seconds
+
+    return () => clearInterval(interval);
+  }, [roleId]);
+
   const hasPermission = (requiredPermission) => {
     return permissions.includes(requiredPermission);
   };
@@ -49,7 +62,7 @@ const Sidebar = () => {
     },
     {
       path: "/hod-ratingApproval",
-      label: "HOD Rating Approvals",
+      label: "Rating Approvals",
       permission: "Approve Ratings",
     },
     {
@@ -62,14 +75,42 @@ const Sidebar = () => {
       label: "Assign Manager",
       permission: "Manage Users",
     },
-    { path: "/view-rating", label: "View Ratings", permission: "View Ratings" },
-    { path: "/emp-emp", label: "Employee", permission: "View Employee Performance" }, // general access
+    { 
+      path: "/view-rating", 
+      label: "View Ratings", 
+      permission: "View Ratings" 
+    },
+    {
+      path: "/emp-emp",
+      label: "Employee",
+      permission: "View Employee Performance",
+    }, // general access
     // { path: "/on-rate", label: "On Ratings", permission: "Rate Trainees" },
-    {path: "/hod-emp", label: "HOD Employee", permission: "HOD Employee View"},
-    {path: "/rate-manger", label: "Rate Managers", permission: "rate managers"},
-    {path: "/hod-ratingApproval", label: "HOD Rating Approvals", permission: "Approve KPI Changes HOD"},
-    {path: "/view-all-ratings", label: "View All Ratings", permission: "View All Ratings"},
-    {path: "/hr-emp-rating", label: "HR Employee Rating", permission: "HR Rating"},
+    {
+      path: "/hod-emp",
+      label: "HOD Employee",
+      permission: "HOD Employee View",
+    },
+    {
+      path: "/rate-manger",
+      label: "Rate Managers",
+      permission: "rate managers",
+    },
+    {
+      path: "/hod-ratingApproval",
+      label: "HOD Rating Approvals",
+      permission: "Approve KPI Changes HOD",
+    },
+    {
+      path: "/view-all-ratings",
+      label: "View All Ratings",
+      permission: "View All Ratings",
+    },
+    {
+      path: "/manager-emp",
+      label: "HR Employee Rating",
+      permission: "HR Rating",
+    },
   ];
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -77,12 +118,27 @@ const Sidebar = () => {
   const handleLogoutConfirm = () => {
     setIsLogoutConfirmOpen(false);
     localStorage.removeItem("permissions");
+    localStorage.removeItem("roleId");
     navigate("/login");
     alert("Admin logged out successfully!");
   };
 
+  const roleBackgrounds = {
+    1: "from-emerald-950 to-green-900",
+    2: "from-gray-950 to-gray-800",
+    3: "from-blue-900 to-blue-700",
+    4: "from-purple-900 to-purple-700",
+    5: "from-amber-900 to-amber-700",
+    6: "from-zinc-900 to-zinc-700",
+  };
+
   return (
-    <div className="min-w-[350px] max-w-[350px] p-6 bg-gradient-to-b from-black to-gray-900 h-screen flex flex-col shadow-xl overflow-hidden">
+    <div
+      className={`min-w-[350px] max-w-[350px] p-6 bg-gradient-to-b ${
+        roleBackgrounds[roleId] || "from-black to-gray-900"
+      } h-screen flex flex-col shadow-xl overflow-hidden`}
+    >
+      {" "}
       <ul className="list-none p-0 space-y-2 mt-20">
         {navItems
           .filter((item) => hasPermission(item.permission))
@@ -110,7 +166,6 @@ const Sidebar = () => {
             );
           })}
       </ul>
-
       <div className="mt-auto space-y-3">
         <button
           onClick={() => setIsLogoutConfirmOpen(true)}
@@ -119,7 +174,6 @@ const Sidebar = () => {
           Log out
         </button>
       </div>
-
       {isLogoutConfirmOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-10 rounded-3xl shadow-2xl w-full max-w-md border border-gray-800">
