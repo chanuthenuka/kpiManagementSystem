@@ -49,7 +49,6 @@ const Sidebar = () => {
       label: "Manage Competencies",
       permission: "Manage Competencies",
     },
-    { path: "/report", label: "Reports", permission: "Report Generation" },
     {
       path: "/manage-department",
       label: "Manage Department",
@@ -65,20 +64,16 @@ const Sidebar = () => {
       label: "Rating Approvals",
       permission: "Approve Ratings",
     },
-    {
-      path: "/hod-kpichanges",
-      label: "Request KPI Changes",
-      permission: "Request KPI Changes",
-    },
+    
     {
       path: "/assign-Manager",
       label: "Assign Manager",
       permission: "Manage Users",
     },
-    { 
-      path: "/view-rating", 
-      label: "View Ratings", 
-      permission: "View Ratings" 
+    {
+      path: "/view-rating",
+      label: "View Ratings",
+      permission: "View Ratings",
     },
     {
       path: "/emp-emp",
@@ -111,6 +106,17 @@ const Sidebar = () => {
       label: "HR Employee Rating",
       permission: "HR Rating",
     },
+    {
+      path: "/hod-kpichanges",
+      label: "Request KPI Changes",
+      permission: "Request KPI Changes",
+    },
+    
+    { 
+      path: "/report", 
+      label: "Reports", 
+      permission: "Report Generation" 
+    },
   ];
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -124,12 +130,12 @@ const Sidebar = () => {
   };
 
   const roleBackgrounds = {
-    1: "from-emerald-950 to-green-900",
-    2: "from-gray-950 to-gray-800",
-    3: "from-blue-900 to-blue-700",
-    4: "from-purple-900 to-purple-700",
-    5: "from-amber-900 to-amber-700",
-    6: "from-zinc-900 to-zinc-700",
+    1: "from-emerald-900 to-green-800", // Deep Emerald
+    2: "from-neutral-900 to-gray-700", // Charcoal Gray
+    3: "from-indigo-900 to-blue-800", // Royal Navy
+    4: "from-purple-950 to-fuchsia-800", // Regal Purple
+    5: "from-amber-950 to-yellow-800", // Golden Bronze
+    6: "from-slate-900 to-zinc-800", // Obsidian Slate
   };
 
   return (

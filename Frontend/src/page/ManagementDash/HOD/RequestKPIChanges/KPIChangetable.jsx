@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const KPIChangetable = () => {
+const KPIChangetable = ({ refresh }) => {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const KPIChangetable = () => {
     };
 
     fetchRequests();
-  }, []);
+  }, [refresh]);
 
   return (
     <div className="p-6">

@@ -92,27 +92,31 @@ router.delete(
 //get emplyee by managerId
 router.get(
   "/getEmployeesByManagerId",
-  authorizePermissions(["Manage Users", "View Employee Ratings","Get_Assigned_emp_by_managerid"]),
+  authorizePermissions([
+    "Manage Users",
+    "View Employee Ratings",
+    "Get_Assigned_emp_by_managerid",
+  ]),
   async (req, res) => {
     try {
       const sql = `
-      SELECT 
-        me.managerId,
-        manager.fullName AS managerName,
-        e.employeeId,
-        e.fullName AS employeeName
-      FROM 
-        ManagerEmployees me
-      JOIN 
-        employee e ON me.employeeId = e.employeeId
-      JOIN 
-        employee manager ON me.managerId = manager.employeeId
-      WHERE 
-        me.deleted_at IS NULL
-        AND e.deleted_at IS NULL
-        AND manager.deleted_at IS NULL;
-    `;
-    
+        SELECT 
+          me.managerId,
+          manager.fullName AS managerName,
+          e.employeeId,
+          e.fullName AS employeeName,
+          e.departmentId   -- added departmentId here
+        FROM 
+          ManagerEmployees me
+        JOIN 
+          employee e ON me.employeeId = e.employeeId
+        JOIN 
+          employee manager ON me.managerId = manager.employeeId
+        WHERE 
+          me.deleted_at IS NULL
+          AND e.deleted_at IS NULL
+          AND manager.deleted_at IS NULL;
+      `;
 
       db.query(sql, (err, results) => {
         if (err) {
@@ -127,5 +131,4 @@ router.get(
     }
   }
 );
-
 module.exports = router;

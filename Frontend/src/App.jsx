@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 //dashboard
 import Body from "./components/Body/Body";
 import NavbarPos from "./components/Dash/Navbar/NavbarPos";
+import FirstPage from "./components/Dash/FirstPage/FirstPage";
 
 //auth
 import Login from "../src/page/Auth/Login/Login";
@@ -126,6 +127,7 @@ function App() {
         <Route element={<EmpLayout />}>
           <Route path="/emp-emp" element={<EMP_EMP />} />
           <Route path="/on-rate" element={<OnRatings />} />
+          <Route path="/first-page" element={<FirstPage />} />
 
           {/*new one*/}
           <Route path="/pending-request" element={<PendingRequest />} />

@@ -30,7 +30,7 @@ const Login = () => {
       localStorage.setItem("roleId", roleId);
       localStorage.setItem("roleName", roleName);
 
-      navigate("/manage-emp");
+      navigate("/first-page");
     }
   } catch (err) {
     console.error("Login error:", err);

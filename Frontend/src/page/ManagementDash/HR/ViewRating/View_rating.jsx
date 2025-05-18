@@ -20,7 +20,7 @@ const View_rating = () => {
 
         const managerId = parseInt(storedEmployeeId, 10); // because localStorage saves strings
 
-        console.log("Logged in Manager ID:", managerId);
+        // console.log("Logged in Manager ID:", managerId);
 
         const response = await axios.get(
           "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",

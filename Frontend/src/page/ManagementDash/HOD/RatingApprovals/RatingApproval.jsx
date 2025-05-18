@@ -7,23 +7,45 @@ const RatingApprovals = () => {
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [newRatings, setNewRatings] = useState({}); // Track rating changes
   const [newFeedbacks, setNewFeedbacks] = useState({}); // Track feedback changes
+  const [departments, setDepartments] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
-  // Fetch ratings data on component mount
+  // Fetch ratings with departmentId filter
+  const fetchRatings = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/kpi-ratings/employee/ratings${
+          selectedDepartment ? `?departmentId=${selectedDepartment}` : ""
+        }`,
+        { withCredentials: true }
+      );
+      setRatings(response.data);
+    } catch (error) {
+      console.error("Error fetching ratings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRatings = async () => {
+    // Fetch departments
+    const fetchDepartments = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/kpi-ratings/employee/ratings",
+          "http://localhost:5000/api/department",
           { withCredentials: true }
         );
-        setRatings(response.data);
+        setDepartments(response.data);
       } catch (error) {
-        console.error("Error fetching ratings:", error);
+        console.error("Error fetching departments:", error);
       }
     };
 
     fetchRatings();
-  }, []);
+    fetchDepartments();
+  }, [selectedDepartment]); // Re-fetch ratings when selectedDepartment changes
 
   // Handle selection of ratings
   const handleSelectRating = (ratingId) => {
@@ -57,39 +79,30 @@ const RatingApprovals = () => {
         ratingId,
         rating:
           newRatings[ratingId] ||
-          ratings.find((r) => r.kpiRatingId === ratingId).rating, // Use new rating or fallback to original
+          ratings.find((r) => r.kpiRatingId === ratingId).rating,
         feedback:
           newFeedbacks[ratingId] ||
-          ratings.find((r) => r.kpiRatingId === ratingId).feedback, // Use new feedback or fallback
-        status: status.toLowerCase(), // Ensure lowercase for backend compatibility
+          ratings.find((r) => r.kpiRatingId === ratingId).feedback,
+        status: status.toLowerCase(),
       }));
 
-      // Send the approval or rejection updates
       for (const update of updates) {
         const { ratingId, rating, feedback, status } = update;
-
-        const response = await axios.put(
+        await axios.put(
           `http://localhost:5000/api/kpi-ratings/${ratingId}`,
-          {
-            rating,
-            feedback,
-            status,
-          },
+          { rating, feedback, status },
           { withCredentials: true }
         );
-
-        console.log(response.data);
       }
 
-      // Update UI: Clear selected ratings and refresh the list
+      // Clear selected ratings and refresh the list
       setSelectedRatings([]);
-      const response = await axios.get(
-        "http://localhost:5000/api/kpi-ratings/employee/ratings",
-        { withCredentials: true }
-      );
-      setRatings(response.data);
+      setIsLoading(true);
+      await fetchRatings(); // Re-fetch ratings with current department filter
     } catch (error) {
       console.error("Error updating ratings:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -105,15 +118,36 @@ const RatingApprovals = () => {
         <section className="bg-white p-6 rounded-lg shadow mb-10">
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-semibold">Pending Approvals</h2>
+            <div className="mb-4 flex gap-4 items-center">
+              <label
+                htmlFor="department"
+                className="text-sm font-medium text-gray-700"
+              >
+                Filter by Department:
+              </label>
+              <select
+                id="department"
+                className="border rounded px-3 py-1 text-sm"
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+              >
+                <option value="">All Departments</option>
+                {departments.map((dept) => (
+                  <option key={dept.departmentId} value={dept.departmentId}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <table className="w-full text-sm text-left border rounded overflow-hidden">
             <thead className="bg-gray-200">
               <tr>
                 <th className="px-3 py-2">Select</th>
-                <th className="px-3 py-2">Name</th>
                 <th className="px-3 py-2">KRA</th>
                 <th className="px-3 py-2">KPI</th>
+                <th className="px-3 py-2">Month</th>
                 <th className="px-3 py-2">Rating</th>
                 <th className="px-3 py-2">Feedback</th>
                 <th className="px-3 py-2">Manager</th>
@@ -122,7 +156,13 @@ const RatingApprovals = () => {
               </tr>
             </thead>
             <tbody>
-              {ratings.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="9" className="text-center px-3 py-2">
+                    Loading...
+                  </td>
+                </tr>
+              ) : ratings.length > 0 ? (
                 ratings.map((rating) => (
                   <tr key={rating.kpiRatingId} className="border-b">
                     <td className="px-3 py-2">
@@ -132,9 +172,9 @@ const RatingApprovals = () => {
                         onChange={() => handleSelectRating(rating.kpiRatingId)}
                       />
                     </td>
-                    <td className="px-3 py-2">{rating.employeeName}</td>
                     <td className="px-3 py-2">{rating.kraDescription}</td>
                     <td className="px-3 py-2">{rating.kpiDescription}</td>
+                    <td className="px-3 py-2">{rating.month}</td>
                     <td className="px-3 py-2">{rating.rating}</td>
                     <td className="px-3 py-2">{rating.feedback}</td>
                     <td className="px-3 py-2">{rating.ratedByEmployee}</td>
@@ -142,7 +182,7 @@ const RatingApprovals = () => {
                       <input
                         type="text"
                         className="w-full border rounded px-2 py-1 text-xs"
-                        value={newRatings[rating.kpiRatingId] ?? rating.rating} // Controlled input
+                        value={newRatings[rating.kpiRatingId] ?? rating.rating}
                         onChange={(e) =>
                           handleRatingChange(rating.kpiRatingId, e.target.value)
                         }
@@ -154,7 +194,7 @@ const RatingApprovals = () => {
                         className="w-full border rounded px-2 py-1 text-xs"
                         value={
                           newFeedbacks[rating.kpiRatingId] ?? rating.feedback
-                        } // Controlled input
+                        }
                         onChange={(e) =>
                           handleFeedbackChange(
                             rating.kpiRatingId,
@@ -168,7 +208,7 @@ const RatingApprovals = () => {
               ) : (
                 <tr>
                   <td colSpan="9" className="text-center px-3 py-2">
-                    No pending ratings.
+                    No pending ratings for the selected department.
                   </td>
                 </tr>
               )}
@@ -179,19 +219,19 @@ const RatingApprovals = () => {
             <button
               onClick={() => handleApproval("Approve")}
               className="px-4 py-2 rounded bg-black text-white hover:bg-green-700"
+              disabled={isLoading}
             >
               Approve
             </button>
             <button
               onClick={() => handleApproval("Reject")}
               className="px-4 py-2 rounded bg-black text-white hover:bg-red-700"
+              disabled={isLoading}
             >
               Reject
             </button>
           </div>
         </section>
-
-        {/* History Section */}
       </main>
     </div>
   );

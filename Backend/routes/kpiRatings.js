@@ -32,23 +32,47 @@ router.get(
   authorizePermissions(["Get All Kpi Ratings"]),
   async (req, res) => {
     try {
-      const sql = `
-           SELECT 
-    kpr.kpiRatingId, kpr.employeeId, kpr.kpiId, kpr.target, kpr.tasks, kpr.month, kpr.rating, kpr.ratedByEmployeeId,kpr.extraRating, kpr.feedback,
-    kpi.description AS kpiDescription, kpi.weitage, kpi.kraId,
-    kra.description AS kraDescription,
-    emp.fullname AS ratedByEmployee
-FROM KPIRatings kpr
-LEFT JOIN KPI kpi ON kpr.kpiId = kpi.kpiId
-LEFT JOIN KRA kra ON kpi.kraId = kra.kraId
-LEFT JOIN employee emp ON kpr.ratedByEmployeeId = emp.employeeId
-WHERE kpr.deleted_at IS NULL
-  AND kpr.status = 'Pending'  
-LIMIT 0, 25;  
+      const { departmentId } = req.query; // Get departmentId from query parameters
 
-        `;
+      // Base SQL query
+      let sql = `
+        SELECT 
+          kpr.kpiRatingId, 
+          kpr.employeeId, 
+          kpr.kpiId, 
+          kpr.target, 
+          kpr.tasks, 
+          kpr.month, 
+          kpr.rating, 
+          kpr.ratedByEmployeeId, 
+          kpr.extraRating, 
+          kpr.feedback, 
+          kpi.description AS kpiDescription, 
+          kpi.weitage, 
+          kpi.kraId, 
+          kra.description AS kraDescription, 
+          emp.fullname AS ratedByEmployee, 
+          emp.departmentId
+        FROM KPIRatings kpr
+        LEFT JOIN KPI kpi ON kpr.kpiId = kpi.kpiId
+        LEFT JOIN KRA kra ON kpi.kraId = kra.kraId
+        LEFT JOIN employee emp ON kpr.ratedByEmployeeId = emp.employeeId
+        WHERE kpr.deleted_at IS NULL
+          AND kpr.status = 'Pending'
+      `;
 
-      db.query(sql, (err, results) => {
+      // Add departmentId filter if provided
+      const queryParams = [];
+      if (departmentId) {
+        sql += ` AND emp.departmentId = ?`;
+        queryParams.push(departmentId);
+      }
+
+      // Add pagination
+      sql += ` LIMIT 0, 25`;
+
+      // Execute the query
+      db.query(sql, queryParams, (err, results) => {
         if (err) {
           console.error("Database error:", err);
           return res.status(500).json({ error: "Internal Server Error" });

@@ -15,26 +15,34 @@ const KPIRatingsForm = ({ selectedUser }) => {
   useEffect(() => {
     // Fetch KPIs based on selected year
     const fetchKpis = async () => {
+      if (!selectedYear || !selectedUser?.departmentId) {
+        setError("Please select a year and user with a valid department");
+        console.log("selecteduserkpi", selectedUser);
+        setKpiOptions([]);
+        return;
+      }
+
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/kpi/get-kra?year=${selectedYear}`,
+          `http://localhost:5000/api/kpi/get-kra?year=${selectedYear}&departmentId=${selectedUser.departmentId}`,
           { withCredentials: true }
         );
-        // Ensure client-side filtering as a fallback
-        const filteredKpis = response.data.filter(
-          (kpi) => kpi.year === selectedYear || !selectedYear
-        );
-        console.log(filteredKpis);
-        setKpiOptions(filteredKpis);
+
+        console.log("API Response:", response.data);
+        setKpiOptions(response.data);
+        setError(""); // Clear any previous errors
       } catch (err) {
-        console.error("Failed to fetch KPI data:", err);
-        setError("Failed to fetch KPIs");
+        console.error(
+          "Failed to fetch KPI data:",
+          err.response?.data || err.message
+        );
+        setError(err.response?.data?.error || "Failed to fetch KPIs");
         setKpiOptions([]);
       }
     };
 
     fetchKpis();
-  }, [selectedYear]);
+  }, [selectedYear, selectedUser]);
 
   useEffect(() => {
     // Initialize ratings only if none exist
@@ -65,7 +73,6 @@ const KPIRatingsForm = ({ selectedUser }) => {
         tasks: "",
         month: `${selectedYear}-01`,
         rating: "",
-        ratedByEmployeeId: loggedInEmployeeId || "",
         extraRating: "",
         feedback: "",
       },
@@ -117,6 +124,7 @@ const KPIRatingsForm = ({ selectedUser }) => {
           month: `${selectedYear}-01`,
           rating: "",
           ratedByEmployeeId: loggedInEmployeeId || "",
+          extraRating: "",
           feedback: "",
         },
       ]);
@@ -215,18 +223,28 @@ const KPIRatingsForm = ({ selectedUser }) => {
             </select>
             <input
               type="number"
-              placeholder="Rating (Out of 100)"
+              placeholder="Rating"
               value={rating.rating}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Allow only integers ≤ 100
-                if (/^\d*$/.test(value) && Number(value) <= 100) {
-                  updateRating(index, "rating", value);
-                }
-              }}
+              onChange={(e) => updateRating(index, "rating", e.target.value)}
+              className="border p-2 rounded"
+            />
+            <input
+              type="number"
+              placeholder="Extra Rating"
+              value={rating.extraRating}
+              onChange={(e) =>
+                updateRating(index, "extraRating", e.target.value)
+              }
               className="border p-2 rounded"
             />
 
+            <input
+              type="text"
+              placeholder="Rated By (Your Employee ID)"
+              value={rating.ratedByEmployeeId}
+              readOnly
+              className="border p-2 rounded bg-gray-100 cursor-not-allowed"
+            />
             <textarea
               placeholder="Feedback"
               value={rating.feedback}

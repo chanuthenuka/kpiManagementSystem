@@ -27,9 +27,9 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
     }));
   }, [selectedUser, loggedInId, selectedYear]);
 
-  useEffect(() => {
-    console.log("Selected user:", selectedUser);
-  }, [selectedUser]);
+  // useEffect(() => {
+  //   console.log("Selected user:", selectedUser);
+  // }, [selectedUser]);
 
   useEffect(() => {
     const fetchCompetencies = async () => {
@@ -51,6 +51,7 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
         setCompetencies([]);
       }
     };
+
     fetchCompetencies();
   }, [selectedYear]);
 
@@ -69,7 +70,9 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
       return;
     }
     if (!formData.competencyId || !formData.month || !formData.rating) {
-      setError("Please fill in all required fields (Competency, Month, Rating)");
+      setError(
+        "Please fill in all required fields (Competency, Month, Rating)"
+      );
       return;
     }
 
@@ -142,8 +145,15 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
             <option value="">Select Competency</option>
             {competencies.length > 0 ? (
               competencies.map((c) => (
-                <option key={c.competencyId} value={c.competencyId}>
+                <option
+                  key={c.competencyId}
+                  value={c.competencyId}
+                  className={
+                    c.isSeniorManager === 1 ? "text-red-600 font-semibold" : ""
+                  }
+                >
                   {c.description} ({c.year})
+                  {c.isSeniorManager === 1 ? " ⭐" : ""}
                 </option>
               ))
             ) : (
@@ -180,6 +190,8 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
             onChange={handleChange}
             className="border p-2 rounded"
           />
+
+          
 
           <textarea
             name="feedback"

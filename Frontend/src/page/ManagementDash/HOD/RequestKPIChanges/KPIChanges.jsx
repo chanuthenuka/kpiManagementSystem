@@ -13,6 +13,8 @@ const RequestKPIChanges = () => {
   const [kpi, setKpi] = useState("");
   const [action, setAction] = useState("");
 
+  const [refreshTable, setRefreshTable] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,6 +62,7 @@ const RequestKPIChanges = () => {
       );
       alert("KPI change request submitted successfully.");
       // Optionally reset form
+      setRefreshTable((prev) => !prev);
       setSelectedKRA("");
       setWeightage("");
       setKpi("");
@@ -173,7 +176,7 @@ const RequestKPIChanges = () => {
               </button>
             </div>
           </div>
-          <KPIChangetable />
+          <KPIChangetable refresh={refreshTable} />
         </div>
       </div>
     </div>

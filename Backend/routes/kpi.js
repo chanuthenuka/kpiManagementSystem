@@ -26,37 +26,33 @@ router.get(
 );
 
 // Create a KPI
-router.post(
-  "/",
-  authorizePermissions(["Manage KPIs"]),
-  async (req, res) => {
-    const { description, departmentId, weitage,year,kraId } = req.body;
-    try {
-      const insertSql = `INSERT INTO KPI (description, departmentId, weitage,year, kraId) VALUES (?, ?, ?,?,?)`;
-      db.query(
-        insertSql,
-        [description, departmentId, weitage,year, kraId],
-        (err, result) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Database insertion failed" });
-          }
-          res.json({
-            id: result.insertId,
-            description,
-            departmentId,
-            weitage,
-            year,
-            kraId,
-          });
+router.post("/", authorizePermissions(["Manage KPIs"]), async (req, res) => {
+  const { description, departmentId, weitage, year, kraId } = req.body;
+  try {
+    const insertSql = `INSERT INTO KPI (description, departmentId, weitage,year, kraId) VALUES (?, ?, ?,?,?)`;
+    db.query(
+      insertSql,
+      [description, departmentId, weitage, year, kraId],
+      (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Database insertion failed" });
         }
-      );
-    } catch (err) {
-      console.error("Error:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+        res.json({
+          id: result.insertId,
+          description,
+          departmentId,
+          weitage,
+          year,
+          kraId,
+        });
+      }
+    );
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-);
+});
 
 // Update a KPI
 router.put("/:id", authorizePermissions(["Manage KPIs"]), async (req, res) => {
@@ -103,16 +99,22 @@ router.delete(
 );
 
 //get kra name with join with kra table
+
 router.get("/get-kra", async (req, res) => {
   try {
-    const { year } = req.query;
+    const { year, departmentId } = req.query;
 
-    // Validate year if provided
+    // Validate inputs
     if (year && !/^\d{4}$/.test(year)) {
-      return res.status(400).json({ error: "Invalid year format. Use YYYY (e.g., 2025)" });
+      return res
+        .status(400)
+        .json({ error: "Invalid year format. Use YYYY (e.g., 2025)" });
+    }
+    if (!departmentId) {
+      return res.status(400).json({ error: "departmentId is required" });
     }
 
-    // Base SQL query
+    // Base query with department filtering
     let selectSql = `
       SELECT 
         kpi.kpiId,
@@ -122,22 +124,35 @@ router.get("/get-kra", async (req, res) => {
         kpi.year,
         kra.description AS kraName
       FROM kpi
-      JOIN kra ON kpi.kraId = kra.kraId 
+      JOIN kra ON kpi.kraId = kra.kraId
       WHERE kpi.deleted_at IS NULL AND kra.deleted_at IS NULL
     `;
 
     const queryParams = [];
 
-    // Add year filter if provided
     if (year) {
       selectSql += ` AND kpi.year = ?`;
       queryParams.push(year);
     }
 
+    if (departmentId) {
+      selectSql += ` AND kpi.departmentId = ?`;
+      queryParams.push(departmentId);
+    }
+
     db.query(selectSql, queryParams, (err, results) => {
       if (err) {
         console.error("Database error:", err);
-        return res.status(500).json({ error: "Database query failed" });
+        return res
+          .status(500)
+          .json({ error: `Database query failed: ${err.message}` });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({
+          error: `No KPIs found for year ${
+            year || "any"
+          } and department ${departmentId}`,
+        });
       }
       res.json(results);
     });
@@ -147,6 +162,8 @@ router.get("/get-kra", async (req, res) => {
   }
 });
 
+module.exports = router;
+
 // get kpi according to year
 router.get("/get-kpi-by-year", async (req, res) => {
   try {
@@ -154,7 +171,9 @@ router.get("/get-kpi-by-year", async (req, res) => {
 
     // Validate year if provided
     if (year && !/^\d{4}$/.test(year)) {
-      return res.status(400).json({ error: "Invalid year format. Use YYYY (e.g., 2025)" });
+      return res
+        .status(400)
+        .json({ error: "Invalid year format. Use YYYY (e.g., 2025)" });
     }
 
     // Base SQL query
