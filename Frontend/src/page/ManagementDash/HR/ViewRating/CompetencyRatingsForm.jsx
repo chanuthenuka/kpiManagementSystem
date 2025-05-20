@@ -19,13 +19,15 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
   const loggedInId = localStorage.getItem("employeeId") || "";
 
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      ratedByEmployeeId: loggedInId,
-      employeeId: selectedUser?.employeeId || "",
-      month: `${selectedYear}-01`, // Initialize month with selected year
-    }));
-  }, [selectedUser, loggedInId, selectedYear]);
+  const defaultMonth = formData.month?.split("-")[1] || "01"; // use existing month if any
+  setFormData((prev) => ({
+    ...prev,
+    ratedByEmployeeId: loggedInId,
+    employeeId: selectedUser?.employeeId || "",
+    month: `${selectedYear}-${defaultMonth}`,
+  }));
+}, [selectedUser, loggedInId, selectedYear]);
+
 
   // useEffect(() => {
   //   console.log("Selected user:", selectedUser);
@@ -60,44 +62,62 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setError("");
+  e.preventDefault();
+  setMessage("");
+  setError("");
 
-    // Validate inputs
-    if (!selectedYear) {
-      setError("Please select a year");
-      return;
-    }
-    if (!formData.competencyId || !formData.month || !formData.rating) {
-      setError(
-        "Please fill in all required fields (Competency, Month, Rating)"
-      );
-      return;
-    }
+  if (!selectedYear) {
+    setError("Please select a year");
+    return;
+  }
+  if (!formData.competencyId || !formData.month || !formData.rating) {
+    setError("Please fill in all required fields (Competency, Month, Rating)");
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/competency-ratings",
-        formData,
-        {
-          withCredentials: true,
-        }
-      );
+  try {
+    await axios.post(
+      "http://localhost:5000/api/competency-ratings",
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
 
-      setMessage("Competency rating saved successfully");
+    setMessage("Competency rating saved successfully");
+
+    const currentIndex = competencies.findIndex(
+      (c) => String(c.competencyId) === String(formData.competencyId)
+    );
+
+    if (currentIndex === -1 || currentIndex >= 9) {
+      // Reset competency select to empty (no selection)
       setFormData({
         employeeId: selectedUser?.employeeId || "",
-        competencyId: "",
-        month: `${selectedYear}-01`,
+        competencyId: "",  // Reset here
+        month: formData.month,
         rating: "",
         ratedByEmployeeId: loggedInId,
         feedback: "",
       });
-    } catch (err) {
-      setError(err.response?.data?.error || "Failed to submit rating");
+    } else {
+      // Move to next competency
+      const nextCompetency = competencies[currentIndex + 1];
+      setFormData({
+        employeeId: selectedUser?.employeeId || "",
+        competencyId: nextCompetency ? nextCompetency.competencyId : "",
+        month: formData.month,
+        rating: "",
+        ratedByEmployeeId: loggedInId,
+        feedback: "",
+      });
     }
-  };
+  } catch (err) {
+    setError(err.response?.data?.error || "Failed to submit rating");
+  }
+};
+
+
 
   return (
     <div>
@@ -153,7 +173,7 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
                   }
                 >
                   {c.description} ({c.year})
-                  {c.isSeniorManager === 1 ? " ⭐" : ""}
+                  {c.isSeniorManager === 1 ? " (For Senior Managers Only)⭐" : ""}
                 </option>
               ))
             ) : (
@@ -164,34 +184,41 @@ const CompetencyRatingsForm = ({ selectedUser }) => {
           </select>
 
           <select
-            name="month"
-            value={formData.month}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          >
-            <option value="">Select Month</option>
-            {Array.from({ length: 12 }, (_, i) => {
-              const month = `${selectedYear}-${String(i + 1).padStart(2, "0")}`;
-              return (
-                <option key={month} value={month}>
-                  {new Date(`${month}-01`).toLocaleString("default", {
-                    month: "long",
-                  })}
-                </option>
-              );
-            })}
-          </select>
+  name="month"
+  value={formData.month}
+  onChange={handleChange}
+  className="border p-2 rounded"
+>
+  <option value="">Select Month</option>
+  {Array.from({ length: 12 }, (_, i) => {
+    const month = `${selectedYear}-${String(i + 1).padStart(2, "0")}`;
+    return (
+      <option key={month} value={month}>
+        {new Date(`${month}-01`).toLocaleString("default", {
+          month: "long",
+        })}
+      </option>
+    );
+  })}
+</select>
+
 
           <input
-            type="number"
+            type="text"
             name="rating"
             placeholder="Rating"
             value={formData.rating}
-            onChange={handleChange}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (
+                value === "" ||
+                (/^\d+$/.test(value) && parseInt(value) <= 100)
+              ) {
+                handleChange(e);
+              }
+            }}
             className="border p-2 rounded"
           />
-
-          
 
           <textarea
             name="feedback"

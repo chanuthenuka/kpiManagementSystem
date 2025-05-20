@@ -140,6 +140,264 @@ WHERE
   }
 );
 
+// Get yearly KPI rating summary for an employee
+router.get(
+  "/employee/:employeeId/year/:year",
+  async (req, res) => {
+    const { employeeId, year } = req.params;
+
+    try {
+      const sql = `
+        SELECT 
+    kra.description AS KRA,
+    kpi.description AS KPI,
+    kpi.weitage,
+
+    r01.rating AS ratingJan,
+    r02.rating AS ratingFeb,
+    r03.rating AS ratingMar,
+    r04.rating AS ratingApr,
+    r05.rating AS ratingMay,
+    r06.rating AS ratingJun,
+    r07.rating AS ratingJul,
+    r08.rating AS ratingAug,
+    r09.rating AS ratingSep,
+    r10.rating AS ratingOct,
+    r11.rating AS ratingNov,
+    r12.rating AS ratingDec,
+
+    -- Quarterly Averages
+    ROUND((COALESCE(r01.rating, 0) + COALESCE(r02.rating, 0) + COALESCE(r03.rating, 0)) / 
+        NULLIF((CASE WHEN r01.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r02.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r03.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS Q1_Average,
+
+    ROUND((COALESCE(r04.rating, 0) + COALESCE(r05.rating, 0) + COALESCE(r06.rating, 0)) / 
+        NULLIF((CASE WHEN r04.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r05.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r06.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS Q2_Average,
+
+    ROUND((COALESCE(r07.rating, 0) + COALESCE(r08.rating, 0) + COALESCE(r09.rating, 0)) / 
+        NULLIF((CASE WHEN r07.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r08.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r09.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS Q3_Average,
+
+    ROUND((COALESCE(r10.rating, 0) + COALESCE(r11.rating, 0) + COALESCE(r12.rating, 0)) / 
+        NULLIF((CASE WHEN r10.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r11.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r12.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS Q4_Average,
+
+    -- Half-Year Averages
+    ROUND((COALESCE(r01.rating, 0) + COALESCE(r02.rating, 0) + COALESCE(r03.rating, 0) + 
+           COALESCE(r04.rating, 0) + COALESCE(r05.rating, 0) + COALESCE(r06.rating, 0)) / 
+        NULLIF((CASE WHEN r01.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r02.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r03.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r04.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r05.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r06.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS H1_Average,
+
+    ROUND((COALESCE(r07.rating, 0) + COALESCE(r08.rating, 0) + COALESCE(r09.rating, 0) + 
+           COALESCE(r10.rating, 0) + COALESCE(r11.rating, 0) + COALESCE(r12.rating, 0)) / 
+        NULLIF((CASE WHEN r07.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r08.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r09.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r10.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r11.rating IS NOT NULL THEN 1 ELSE 0 END + 
+                CASE WHEN r12.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS H2_Average,
+
+    -- Yearly Average
+    ROUND((COALESCE(r01.rating, 0) + COALESCE(r02.rating, 0) + COALESCE(r03.rating, 0) +
+           COALESCE(r04.rating, 0) + COALESCE(r05.rating, 0) + COALESCE(r06.rating, 0) +
+           COALESCE(r07.rating, 0) + COALESCE(r08.rating, 0) + COALESCE(r09.rating, 0) +
+           COALESCE(r10.rating, 0) + COALESCE(r11.rating, 0) + COALESCE(r12.rating, 0)) /
+        NULLIF((CASE WHEN r01.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r02.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r03.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r04.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r05.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r06.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r07.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r08.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r09.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r10.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r11.rating IS NOT NULL THEN 1 ELSE 0 END +
+                CASE WHEN r12.rating IS NOT NULL THEN 1 ELSE 0 END), 0), 2) AS Year_Average
+
+FROM KRA kra
+INNER JOIN KPI kpi ON kra.kraId = kpi.kraId AND kpi.deleted_at IS NULL
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-01') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r01 ON r01.kpiId = kpi.kpiId
+
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-02') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r02 ON r02.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-03') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r03 ON r03.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-04') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r04 ON r04.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-05') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r05 ON r05.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-06') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r06 ON r06.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-07') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r07 ON r07.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-08') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r08 ON r08.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-09') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r09 ON r09.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-10') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r10 ON r10.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-11') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r11 ON r11.kpiId = kpi.kpiId
+ 
+LEFT JOIN (
+    SELECT kr.*
+    FROM kpiRatings kr
+    INNER JOIN (
+        SELECT kpiId, employeeId, month, MAX(created_at) AS max_created
+        FROM kpiRatings
+        WHERE month = CONCAT(?, '-12') AND employeeId = ? AND deleted_at IS NULL AND status = 'approve'
+        GROUP BY kpiId, employeeId, month
+    ) latest ON kr.kpiId = latest.kpiId AND kr.employeeId = latest.employeeId AND kr.month = latest.month AND kr.created_at = latest.max_created
+) r12 ON r12.kpiId = kpi.kpiId
+
+WHERE 
+    kra.year = ? 
+    AND kra.deleted_at IS NULL
+    AND EXISTS (
+        SELECT 1 
+        FROM kpiRatings kr 
+        WHERE kr.kpiId = kpi.kpiId 
+        AND kr.employeeId = ? 
+        AND kr.deleted_at IS NULL 
+        AND kr.status = 'approve'
+    )
+
+ORDER BY kra.kraId, kpi.kpiId;
+
+      `;
+
+      const params = [
+        year, employeeId, year, employeeId, year, employeeId,
+        year, employeeId, year, employeeId, year, employeeId,
+        year, employeeId, year, employeeId, year, employeeId,
+        year, employeeId, year, employeeId, year, employeeId,
+        year,  // for kra.year = ?
+  employeeId // for EXISTS subquery
+      ];
+
+      db.query(sql, params, (err, results) => {
+        if (err) {
+          console.error("Query error:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        res.json(results);
+      });
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
+
 // Create a KPI rating
 router.post(
   "/",

@@ -12,6 +12,7 @@ const RatingApprovals = () => {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [selectedManager, setSelectedManager] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
 
   // Fetch ratings with departmentId filter
   const fetchRatings = async () => {
@@ -83,7 +84,7 @@ const RatingApprovals = () => {
           newRatings[ratingId] ||
           ratings.find((r) => r.kpiRatingId === ratingId).rating,
         feedback:
-          newFeedbacks[ratingId] || 
+          newFeedbacks[ratingId] ||
           ratings.find((r) => r.kpiRatingId === ratingId).feedback,
         status: status.toLowerCase(),
       }));
@@ -99,6 +100,7 @@ const RatingApprovals = () => {
 
       // Clear selected ratings and refresh the list
       setSelectedRatings([]);
+      setSelectAll(false);
       setIsLoading(true);
       await fetchRatings(); // Re-fetch ratings with current department filter
     } catch (error) {
@@ -106,6 +108,15 @@ const RatingApprovals = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRatings([]);
+    } else {
+      setSelectedRatings(filteredRatings.map((rating) => rating.kpiRatingId));
+    }
+    setSelectAll(!selectAll);
   };
 
   const filteredRatings = ratings.filter((rating) => {
@@ -196,7 +207,14 @@ const RatingApprovals = () => {
                 <th className="px-3 py-2">Manager</th>
                 <th className="px-3 py-2">New Rating</th>
                 <th className="px-3 py-2">New Feedback</th>
-                <th className="px-3 py-2">Select</th>
+                <th className="px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4"
+                  />
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -262,6 +280,7 @@ const RatingApprovals = () => {
                       <input
                         type="checkbox"
                         className="w-4 h-4"
+                        checked={selectedRatings.includes(rating.kpiRatingId)}
                         onChange={() => handleSelectRating(rating.kpiRatingId)}
                       />
                     </td>

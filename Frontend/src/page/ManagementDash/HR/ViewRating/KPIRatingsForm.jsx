@@ -113,15 +113,28 @@ const KPIRatingsForm = ({ selectedUser }) => {
         throw new Error(response.data.error || "Failed to submit ratings");
       }
 
+      const lastKpiId = kpiRatings[kpiRatings.length - 1]?.kpiId;
+
+      // Convert both to strings to ensure correct comparison
+      const currentIndex = kpiOptions.findIndex(
+        (kpi) => String(kpi.kpiId) === String(lastKpiId)
+      );
+
+      // Safely get next KPI only if currentIndex is valid and not last KPI
+      const nextKpi =
+        currentIndex >= 0 && currentIndex < kpiOptions.length - 1
+          ? kpiOptions[currentIndex + 1]
+          : null;
+
       setMessage(response.data.message || "Ratings submitted successfully!");
       // Reset form
       setKpiRatings([
         {
           employeeId: selectedUser?.employeeId || "",
-          kpiId: "",
+          kpiId: nextKpi?.kpiId || "",
           target: "",
           tasks: "",
-          month: `${selectedYear}-01`,
+          month: kpiRatings[0]?.month || `${selectedYear}-01`,
           rating: "",
           ratedByEmployeeId: loggedInEmployeeId || "",
           extraRating: "",
@@ -222,13 +235,22 @@ const KPIRatingsForm = ({ selectedUser }) => {
               })}
             </select>
             <input
-              type="number"
+              type="text"
               placeholder="Rating"
               value={rating.rating}
-              onChange={(e) => updateRating(index, "rating", e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow empty input, or only digits, and value <= 100
+                if (
+                  value === "" ||
+                  (/^\d+$/.test(value) && parseInt(value) <= 100)
+                ) {
+                  updateRating(index, "rating", value);
+                }
+              }}
               className="border p-2 rounded"
             />
-            
+
             <textarea
               placeholder="Feedback"
               value={rating.feedback}

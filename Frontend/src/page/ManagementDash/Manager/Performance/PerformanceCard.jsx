@@ -172,58 +172,53 @@ const PerformanceCard = () => {
   }, [kpi, kpiRatings, selectedMonth, selectedYear]);
 
   useEffect(() => {
-    if (!competency.length || !competencyRatings.length) return;
+  if (!competency.length || !competencyRatings.length) return;
 
-    let actualScore = 0;
-    let fullScore = 0;
-    let actualWeightage = 0;
+  let actualScore = 0;
+  let fullScore = 0;
+  let actualWeightage = 0;
 
-    const selectedPeriod = `${selectedYear}-${String(selectedMonth).padStart(
-      2,
-      "0"
-    )}`;
+  const selectedPeriod = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+  const totalCompetencyWeightage = 20; // competencies contribute 20%
 
-    console.log("month", selectedPeriod);
+  // Count how many competencies were rated in the selected period
+  const ratedCount = competency.filter((c) =>
+    competencyRatings.find(
+      (r) => r.competencyId === c.competencyId && r.month === selectedPeriod && typeof r.rating === "number"
+    )
+  ).length;
 
-    const totalCompetencyWeightage = 20; // competencies contribute 20% to total score
-    const perCompetencyWeight =
-      totalCompetencyWeightage / competency.length / 100; // e.g. 0.05
-    console.log("per", perCompetencyWeight);
+  const perCompetencyWeight = ratedCount > 0 ? totalCompetencyWeightage / ratedCount / 100 : 0;
 
-    console.log("comR", competencyRatings);
-    console.log("com", competency);
+  competency.forEach((c) => {
+    const ratingObj = competencyRatings.find(
+      (r) => r.competencyId === c.competencyId && r.month === selectedPeriod
+    );
 
-    competency.forEach((c) => {
-      const ratingObj = competencyRatings.find(
-        (r) => r.competencyId === c.competencyId && r.month === selectedPeriod
-      );
+    const rating = ratingObj && typeof ratingObj.rating === "number" ? Number(ratingObj.rating) : 0;
 
-      if (ratingObj && typeof ratingObj.rating === "number") {
-        const rating = Number(ratingObj.rating);
-        actualScore += perCompetencyWeight * rating;
-        actualWeightage += perCompetencyWeight;
-      }
+    // Only count actual ratings (not zero) for actualScore
+    if (rating > 0) {
+      actualScore += perCompetencyWeight/100 * rating;
+      actualWeightage += perCompetencyWeight;
+    }
 
-      console.log("ratingObj", ratingObj);
+    // Full score includes all, rated or not (0 if not rated)
+    fullScore += perCompetencyWeight * rating;
+  });
 
-      const rating = ratingObj ? ratingObj.rating : 0;
-      console.log("rating", rating);
-      fullScore += perCompetencyWeight * rating; // unrated treated as 0
-    });
+  const normalizedActual =
+    actualWeightage > 0
+      ? (actualScore / actualWeightage) * totalCompetencyWeightage
+      : 0;
 
-    console.log("actual", actualScore);
-    console.log("full", fullScore);
+  const normalizedFull = fullScore; // already out of 20%
 
-    const normalizedActual =
-      actualWeightage > 0
-        ? (actualScore / actualWeightage) * totalCompetencyWeightage
-        : 0;
+  setActualComScore(Number(normalizedActual.toFixed(2)));
+  setFullComScore(Number(normalizedFull.toFixed(2)));
+}, [competencyRatings, competency, selectedMonth, selectedYear]);
 
-    const normalizedFull = fullScore; // already reflects % out of 20
 
-    setActualComScore(Number(normalizedActual.toFixed(2)));
-    setFullComScore(Number(normalizedFull.toFixed(2)));
-  }, [competencyRatings, competency, selectedMonth, selectedYear]);
 
   // Filter ratings based on selectedMonth and selectedYear
   const filteredKpiRatings = kpiRatings.filter((item) => {
@@ -493,9 +488,6 @@ const PerformanceCard = () => {
                     Month
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
-                    Weightage
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
                     Feedback
                   </th>
                 </tr>
@@ -511,10 +503,7 @@ const PerformanceCard = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-800">
                       {item.month}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-800">
-                      {item.weitage}
-                    </td>
+                    </td>                    
                     <td className="px-6 py-4 text-sm text-gray-800">
                       {item.feedback || "No feedback provided"}
                     </td>
@@ -525,14 +514,7 @@ const PerformanceCard = () => {
           )}
           {/* Display Actual and Full Scores */}
           <div className="mt-4 flex space-x-8">
-            <div>
-              <span className="text-sm font-semibold text-gray-700">
-                Actual Score:
-              </span>
-              <span className="text-sm text-gray-600 ml-2">
-                {actualComScore.toFixed(2)}
-              </span>
-            </div>
+            
             <div>
               <span className="text-sm font-semibold text-gray-700">
                 Full Score:
@@ -589,12 +571,6 @@ const PerformanceCard = () => {
                             KPI
                           </th>
                           <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                            Target
-                          </th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                            Tasks
-                          </th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
                             Weightage
                           </th>
                           <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 min-w-[100px]">
@@ -615,9 +591,6 @@ const PerformanceCard = () => {
                           <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 min-w-[100px]">
                             Year-end
                           </th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 min-w-[100px]">
-                            Manager Comment
-                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -628,12 +601,6 @@ const PerformanceCard = () => {
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-600">
                               {item.kpiDescription}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-600">
-                              {item.target}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-600">
-                              {item.tasks}
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-600">
                               {item.weightage ? `${item.weightage}%` : "N/A"}
@@ -660,9 +627,6 @@ const PerformanceCard = () => {
                                 ...item.Q3,
                                 ...item.Q4,
                               ])}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-600 min-w-[100px]">
-                              {item.feedback}
                             </td>
                           </tr>
                         ))}
@@ -710,9 +674,6 @@ const PerformanceCard = () => {
                           <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 min-w-[100px]">
                             Year-end
                           </th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 min-w-[100px]">
-                            Manager Comment
-                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -747,9 +708,6 @@ const PerformanceCard = () => {
                                   ...item.Q3,
                                   ...item.Q4,
                                 ])}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-600 min-w-[100px]">
-                                {item.feedback}
                               </td>
                             </tr>
                           )

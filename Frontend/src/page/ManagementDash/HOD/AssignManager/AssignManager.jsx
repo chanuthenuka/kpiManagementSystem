@@ -11,6 +11,7 @@ const AssignManager = () => {
   const [selectedManager, setSelectedManager] = useState("");
   const [data, setData] = useState([]);
   const [userRoleId, setUserRoleId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     // Retrieve roleId from localStorage
@@ -25,66 +26,64 @@ const AssignManager = () => {
   }, []);
 
   useEffect(() => {
-  const fetchEmployees = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/employees", {
-        method: "GET",
-        credentials: "include",
-      });
+    const fetchEmployees = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/employees", {
+          method: "GET",
+          credentials: "include",
+        });
 
-      if (!res.ok) throw new Error("Failed to fetch employees");
+        if (!res.ok) throw new Error("Failed to fetch employees");
 
-      const result = await res.json();
+        const result = await res.json();
 
-      let employeeRoleId = 1; // Default
-      let managerRoleId = 2; // Default
+        let employeeRoleId = 1; // Default
+        let managerRoleId = 2; // Default
 
-      if (userRoleId === 6) {
-        employeeRoleId = 4;
-        managerRoleId = 5;
-      } else if (userRoleId === 3) {
-        employeeRoleId = 1;
-        managerRoleId = 2;
+        if (userRoleId === 6) {
+          employeeRoleId = 4;
+          managerRoleId = 5;
+        } else if (userRoleId === 3) {
+          employeeRoleId = 1;
+          managerRoleId = 2;
+        }
+
+        const filteredEmployees = result.filter(
+          (emp) => emp.roleId === employeeRoleId
+        );
+        const filteredManagers = result.filter(
+          (emp) => emp.roleId === managerRoleId
+        );
+
+        setEmployees(filteredEmployees);
+        setManagers(filteredManagers);
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+        toast.error("Failed to fetch employees");
       }
+    };
 
-      const filteredEmployees = result.filter(
-        (emp) => emp.roleId === employeeRoleId
-      );
-      const filteredManagers = result.filter(
-        (emp) => emp.roleId === managerRoleId
-      );
+    if (userRoleId !== null) {
+      fetchEmployees();
+    }
+  }, [userRoleId]);
 
-      setEmployees(filteredEmployees);
-      setManagers(filteredManagers);
+  const fetchAssignments = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",
+        { withCredentials: true }
+      );
+      setData(res.data);
     } catch (err) {
-      console.error("Error fetching employees:", err);
-      toast.error("Failed to fetch employees");
+      console.error("Error fetching manager-employee data:", err);
+      toast.error("Failed to fetch manager-employee data");
     }
   };
 
-  if (userRoleId !== null) {
-    fetchEmployees();
-  }
-}, [userRoleId]);
-
-
-  const fetchAssignments = async () => {
-  try {
-    const res = await axios.get(
-      "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",
-      { withCredentials: true }
-    );
-    setData(res.data);
-  } catch (err) {
-    console.error("Error fetching manager-employee data:", err);
-    toast.error("Failed to fetch manager-employee data");
-  }
-};
-
-useEffect(() => {
-  fetchAssignments();
-}, []);
-
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
 
   const handleClearSelection = () => {
     setSelectedEmployees([]);
@@ -100,61 +99,59 @@ useEffect(() => {
   };
 
   const handleRemove = async (managerId, employeeId) => {
-  try {
-    const res = await fetch("http://localhost:5000/api/manager-employees", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",  // Include cookies if your backend uses session auth
-      body: JSON.stringify({ managerId, employeeId }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/manager-employees", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Include cookies if your backend uses session auth
+        body: JSON.stringify({ managerId, employeeId }),
+      });
 
-    if (!res.ok) throw new Error("Failed to delete assignment");
+      if (!res.ok) throw new Error("Failed to delete assignment");
 
-    const data = await res.json();
-    console.log("Delete success:", data);
-    toast.success("Assignment removed");
-    fetchAssignments(); // Refresh the table after deletion
-  } catch (err) {
-    console.error("Delete failed:", err);
-    toast.error("Failed to remove assignment");
-  }
-};
-
+      const data = await res.json();
+      console.log("Delete success:", data);
+      toast.success("Assignment removed");
+      fetchAssignments(); // Refresh the table after deletion
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to remove assignment");
+    }
+  };
 
   const handleAssign = async () => {
-  if (!selectedManager || selectedEmployees.length === 0) {
-    toast.warn("Please select both a manager and at least one employee");
-    return;
-  }
+    if (!selectedManager || selectedEmployees.length === 0) {
+      toast.warn("Please select both a manager and at least one employee");
+      return;
+    }
 
-  try {
-    const res = await fetch("http://localhost:5000/api/manager-employees", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        managerId: selectedManager,
-        employeeIds: selectedEmployees,
-      }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/manager-employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          managerId: selectedManager,
+          employeeIds: selectedEmployees,
+        }),
+      });
 
-    if (!res.ok) throw new Error("Failed to assign employees");
+      if (!res.ok) throw new Error("Failed to assign employees");
 
-    const data = await res.json();
-    toast.success("Employees assigned successfully");
+      const data = await res.json();
+      toast.success("Employees assigned successfully");
 
-    fetchAssignments(); // Refresh list
-    handleClearSelection(); // Reset form
-  } catch (err) {
-    console.error("Error assigning employees:", err);
-    toast.error("Assignment failed");
-  }
-};
-
+      fetchAssignments(); // Refresh list
+      handleClearSelection(); // Reset form
+    } catch (err) {
+      console.error("Error assigning employees:", err);
+      toast.error("Assignment failed");
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
@@ -178,21 +175,10 @@ useEffect(() => {
                   <input
                     type="text"
                     placeholder="Search employees..."
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white text-gray-800 placeholder-gray-400 transition-all duration-300"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mb-4 w-full border border-gray-300 rounded px-3 py-2"
                   />
-                  <svg
-                    className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
                 </div>
 
                 <div className="overflow-x-auto mt-4">
@@ -209,30 +195,36 @@ useEffect(() => {
                     </thead>
                     <tbody>
                       {employees.length > 0 ? (
-                        employees.map((emp, index) => (
-                          <tr
-                            key={emp.employeeId}
-                            className={`border-b ${
-                              index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                            } hover:bg-gray-100 transition-colors`}
-                          >
-                            <td className="py-3 px-4 text-gray-700">
-                              {emp.fullName}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <input
-                                type="checkbox"
-                                className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                checked={selectedEmployees.includes(
-                                  emp.employeeId
-                                )}
-                                onChange={() =>
-                                  handleEmployeeCheckbox(emp.employeeId)
-                                }
-                              />
-                            </td>
-                          </tr>
-                        ))
+                        employees
+                          .filter((emp) =>
+                            emp.fullName
+                              .toLowerCase()
+                              .includes(searchTerm.toLowerCase())
+                          )
+                          .map((emp, index) => (
+                            <tr
+                              key={emp.employeeId}
+                              className={`border-b ${
+                                index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                              } hover:bg-gray-100 transition-colors`}
+                            >
+                              <td className="py-3 px-4 text-gray-700">
+                                {emp.fullName}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <input
+                                  type="checkbox"
+                                  className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                  checked={selectedEmployees.includes(
+                                    emp.employeeId
+                                  )}
+                                  onChange={() =>
+                                    handleEmployeeCheckbox(emp.employeeId)
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          ))
                       ) : (
                         <tr>
                           <td
@@ -335,8 +327,11 @@ useEffect(() => {
                           </td>
                           <td className="px-4 py-3 text-sm flex space-x-2">
                             <button
-                              onClick={() => handleRemove(item.managerId, item.employeeId) }
-                              className="text-red-500 hover:text-red-700" >
+                              onClick={() =>
+                                handleRemove(item.managerId, item.employeeId)
+                              }
+                              className="text-red-500 hover:text-red-700"
+                            >
                               Remove
                             </button>
                           </td>
