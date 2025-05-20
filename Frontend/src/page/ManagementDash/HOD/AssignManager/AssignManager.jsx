@@ -25,89 +25,66 @@ const AssignManager = () => {
   }, []);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/employees", {
-          withCredentials: true,
-        });
-
-        let employeeRoleId = 1; // Default
-        let managerRoleId = 2; // Default
-
-        if (userRoleId === 6) {
-          employeeRoleId = 4;
-          managerRoleId = 5;
-        } else if (userRoleId === 3) {
-          employeeRoleId = 1;
-          managerRoleId = 2;
-        }
-
-        const filteredEmployees = response.data.filter(
-          (emp) => emp.roleId === employeeRoleId
-        );
-        const filteredManagers = response.data.filter(
-          (emp) => emp.roleId === managerRoleId
-        );
-
-        setEmployees(filteredEmployees);
-        setManagers(filteredManagers);
-      } catch (err) {
-        console.error("Error fetching employees:", err);
-        toast.error("Failed to fetch employees");
-      }
-    };
-
-    if (userRoleId !== null) {
-      fetchEmployees();
-    }
-  }, [userRoleId]);
-
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",
-          { withCredentials: true }
-        );
-        setData(res.data);
-      } catch (err) {
-        console.error("Error fetching manager-employee data:", err);
-        toast.error("Failed to fetch manager-employee data");
-      }
-    };
-
-    fetchAssignments();
-  }, []);
-
-  const handleAssign = async () => {
-    if (!selectedManager) {
-      toast.error("Please select a manager!");
-      return;
-    }
-
-    if (selectedEmployees.length === 0) {
-      toast.error("Please select at least one employee!");
-      return;
-    }
-
+  const fetchEmployees = async () => {
     try {
-      for (const employeeId of selectedEmployees) {
-        await axios.post(
-          "http://localhost:5000/api/manager-employees",
-          { managerId: selectedManager, employeeId },
-          { withCredentials: true }
-        );
+      const res = await fetch("http://localhost:5000/api/employees", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch employees");
+
+      const result = await res.json();
+
+      let employeeRoleId = 1; // Default
+      let managerRoleId = 2; // Default
+
+      if (userRoleId === 6) {
+        employeeRoleId = 4;
+        managerRoleId = 5;
+      } else if (userRoleId === 3) {
+        employeeRoleId = 1;
+        managerRoleId = 2;
       }
 
-      toast.success("Employees successfully assigned to manager!");
-      setSelectedEmployees([]);
-      setSelectedManager("");
-      fetchAssignments(); // Refresh assignments table
-    } catch (error) {
-      console.error("Error assigning manager:", error);
-      toast.error("Failed to assign manager");
+      const filteredEmployees = result.filter(
+        (emp) => emp.roleId === employeeRoleId
+      );
+      const filteredManagers = result.filter(
+        (emp) => emp.roleId === managerRoleId
+      );
+
+      setEmployees(filteredEmployees);
+      setManagers(filteredManagers);
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+      toast.error("Failed to fetch employees");
     }
   };
+
+  if (userRoleId !== null) {
+    fetchEmployees();
+  }
+}, [userRoleId]);
+
+
+  const fetchAssignments = async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",
+      { withCredentials: true }
+    );
+    setData(res.data);
+  } catch (err) {
+    console.error("Error fetching manager-employee data:", err);
+    toast.error("Failed to fetch manager-employee data");
+  }
+};
+
+useEffect(() => {
+  fetchAssignments();
+}, []);
+
 
   const handleClearSelection = () => {
     setSelectedEmployees([]);
@@ -121,6 +98,63 @@ const AssignManager = () => {
       setSelectedEmployees([...selectedEmployees, employeeId]);
     }
   };
+
+  const handleRemove = async (managerId, employeeId) => {
+  try {
+    const res = await fetch("http://localhost:5000/api/manager-employees", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",  // Include cookies if your backend uses session auth
+      body: JSON.stringify({ managerId, employeeId }),
+    });
+
+    if (!res.ok) throw new Error("Failed to delete assignment");
+
+    const data = await res.json();
+    console.log("Delete success:", data);
+    toast.success("Assignment removed");
+    fetchAssignments(); // Refresh the table after deletion
+  } catch (err) {
+    console.error("Delete failed:", err);
+    toast.error("Failed to remove assignment");
+  }
+};
+
+
+  const handleAssign = async () => {
+  if (!selectedManager || selectedEmployees.length === 0) {
+    toast.warn("Please select both a manager and at least one employee");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/manager-employees", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        managerId: selectedManager,
+        employeeIds: selectedEmployees,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to assign employees");
+
+    const data = await res.json();
+    toast.success("Employees assigned successfully");
+
+    fetchAssignments(); // Refresh list
+    handleClearSelection(); // Reset form
+  } catch (err) {
+    console.error("Error assigning employees:", err);
+    toast.error("Assignment failed");
+  }
+};
+
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
@@ -300,10 +334,9 @@ const AssignManager = () => {
                             {item.managerName || "Not Assigned"}
                           </td>
                           <td className="px-4 py-3 text-sm flex space-x-2">
-                            <button className="text-blue-600 hover:text-blue-800">
-                              Edit
-                            </button>
-                            <button className="text-red-600 hover:text-red-800">
+                            <button
+                              onClick={() => handleRemove(item.managerId, item.employeeId) }
+                              className="text-red-500 hover:text-red-700" >
                               Remove
                             </button>
                           </td>

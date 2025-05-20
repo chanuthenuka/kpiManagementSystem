@@ -23,26 +23,61 @@ router.get("/", authorizePermissions(["Manage Users"]), async (req, res) => {
 
 // Create a manager-employee mapping
 router.post("/", authorizePermissions(["Manage Users"]), async (req, res) => {
-  const { managerId, employeeId } = req.body;
+  const { managerId, employeeIds } = req.body; // plural
 
-  try {
-    const sql = `INSERT INTO managerEmployees (managerId, employeeId) VALUES (?, ?)`;
-    db.query(sql, [managerId, employeeId], (err, result) => {
-      if (err) {
-        console.error("Error inserting:", err);
-        return res.status(500).json({ error: "Database insertion failed" });
-      }
-
-      res.json({
-        message: "Manager-Employee mapping created successfully",
-        id: result.insertId,
-      });
-    });
-  } catch (err) {
-    console.error("Error:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+  if (!managerId || !Array.isArray(employeeIds) || employeeIds.length === 0) {
+    return res.status(400).json({ error: "Manager ID and employee IDs are required" });
   }
+
+  const results = [];
+  for (const employeeId of employeeIds) {
+    try {
+      const checkSql = `
+        SELECT * FROM managerEmployees WHERE managerId = ? AND employeeId = ? LIMIT 1
+      `;
+
+      const existing = await new Promise((resolve, reject) => {
+        db.query(checkSql, [managerId, employeeId], (err, res) => {
+          if (err) reject(err);
+          else resolve(res[0]);
+        });
+      });
+
+      if (existing) {
+        if (existing.deleted_at) {
+          // undelete
+          const undeleteSql = `UPDATE managerEmployees SET deleted_at = NULL WHERE id = ?`;
+          await new Promise((resolve, reject) => {
+            db.query(undeleteSql, [existing.id], (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+          results.push({ employeeId, status: "restored" });
+        } else {
+          results.push({ employeeId, status: "already exists" });
+        }
+      } else {
+        // insert new
+        const insertSql = `INSERT INTO managerEmployees (managerId, employeeId) VALUES (?, ?)`;
+        await new Promise((resolve, reject) => {
+          db.query(insertSql, [managerId, employeeId], (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+        results.push({ employeeId, status: "created" });
+      }
+    } catch (err) {
+      console.error(`Error processing employeeId ${employeeId}:`, err);
+      results.push({ employeeId, status: "error", error: err.message });
+    }
+  }
+
+  return res.json({ message: "Processed batch assignment", results });
 });
+
+
 
 // Update a manager-employee mapping
 router.put("/:id", authorizePermissions(["Manage Users"]), async (req, res) => {
@@ -65,19 +100,31 @@ router.put("/:id", authorizePermissions(["Manage Users"]), async (req, res) => {
   }
 });
 
-// Soft delete a manager-employee mapping
+// Soft delete a manager-employee mapping based on managerId and employeeId
 router.delete(
-  "/:id",
+  "/",
   authorizePermissions(["Manage Users"]),
   async (req, res) => {
-    const { id } = req.params;
+    const { managerId, employeeId } = req.body;
+
+    if (!managerId || !employeeId) {
+      return res.status(400).json({ message: "managerId and employeeId are required" });
+    }
 
     try {
-      const sql = `UPDATE managerEmployees SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL`;
-      db.query(sql, [id], (err, result) => {
-        if (err) throw err;
+      const sql = `
+        UPDATE managerEmployees 
+        SET deleted_at = NOW() 
+        WHERE managerId = ? AND employeeId = ? AND deleted_at IS NULL
+      `;
+      db.query(sql, [managerId, employeeId], (err, result) => {
+        if (err) {
+          console.error("Database error:", err);
+          return res.status(500).json({ error: "Database error" });
+        }
+
         if (result.affectedRows > 0) {
-          res.json({ message: "Mapping deleted successfully (soft delete)" });
+          res.json({ message: "Mapping soft-deleted successfully" });
         } else {
           res.status(404).json({ message: "Mapping not found" });
         }
@@ -88,6 +135,7 @@ router.delete(
     }
   }
 );
+
 
 //get emplyee by managerId
 router.get(
@@ -105,17 +153,15 @@ router.get(
           manager.fullName AS managerName,
           e.employeeId,
           e.fullName AS employeeName,
-          e.departmentId   -- added departmentId here
-        FROM 
-          ManagerEmployees me
-        JOIN 
-          employee e ON me.employeeId = e.employeeId
-        JOIN 
-          employee manager ON me.managerId = manager.employeeId
-        WHERE 
-          me.deleted_at IS NULL
-          AND e.deleted_at IS NULL
-          AND manager.deleted_at IS NULL;
+          e.departmentId,
+          d.name AS departmentName
+        FROM ManagerEmployees me 
+        JOIN employee e ON me.employeeId = e.employeeId
+        JOIN employee manager ON me.managerId = manager.employeeId
+        JOIN department d ON e.departmentId = d.departmentId
+        WHERE me.deleted_at IS NULL
+        AND e.deleted_at IS NULL
+        AND manager.deleted_at IS NULL;
       `;
 
       db.query(sql, (err, results) => {

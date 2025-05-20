@@ -114,7 +114,7 @@ const e = require("express");
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const sql = "SELECT * FROM employee WHERE email = ?";
+  const sql = "SELECT * FROM employee WHERE email = ? AND deleted_at IS NULL";
   db.query(sql, [email], async (err, results) => {
     if (err || results.length === 0)
       return res.status(401).json({ msg: "Invalid credentials" });
@@ -296,7 +296,6 @@ router.post(
   }
 );
 
-// Update an employee
 // Update an employee
 router.put(
   "/:id",

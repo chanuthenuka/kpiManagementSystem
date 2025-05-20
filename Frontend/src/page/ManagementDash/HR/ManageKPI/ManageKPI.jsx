@@ -489,7 +489,7 @@ const ManageKPIs = () => {
                             {kpi.description}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
-                            {kpi.weitage}
+                            {kpi.weitage}%
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {kpi.year}

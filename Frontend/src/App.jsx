@@ -93,10 +93,7 @@ function App() {
 
         <Route element={<HRLayout />}>
           <Route path="/view-rating" element={<Manager_EMP />} />
-          <Route
-            path="/view_rating_card/:employeeId"
-            element={<PerformanceCard />}
-          />
+          <Route path="/view_rating_card/:employeeId" element={<PerformanceCard />} />
           <Route path="/manage-kpi" element={<Manage_KPIs />} />
           <Route path="/manage-kra" element={<Manage_KRAs />} />
           <Route path="/manage-competenice" element={<ManageCompetenice />} />
@@ -114,10 +111,7 @@ function App() {
           <Route path="/rate-manger" element={<Ratemangers />} />
           <Route path="/rating-app" element={<HodRatingApprovals />} />
           <Route path="/view-all-ratings" element={<View_All_ratings />} />
-          <Route
-            path="/view-all-ratings-two/:id"
-            element={<View_All_rating2 />}
-          />
+          <Route path="/view-all-ratings-two/:id" element={<View_All_rating2 />} />
         </Route>
 
         <Route element={<ManagerLayout />}>

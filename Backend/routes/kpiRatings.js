@@ -4,6 +4,7 @@ const db = require("../db/db");
 const passport = require("passport");
 const authorizePermissions = require("../middlewares/authMiddleware");
 
+
 // Protect all routes
 router.use(passport.authenticate("jwt", { session: false }));
 
@@ -39,6 +40,7 @@ router.get(
         SELECT 
           kpr.kpiRatingId, 
           kpr.employeeId, 
+          e1.fullName, 
           kpr.kpiId, 
           kpr.target, 
           kpr.tasks, 
@@ -57,6 +59,7 @@ router.get(
         LEFT JOIN KPI kpi ON kpr.kpiId = kpi.kpiId
         LEFT JOIN KRA kra ON kpi.kraId = kra.kraId
         LEFT JOIN employee emp ON kpr.ratedByEmployeeId = emp.employeeId
+        LEFT JOIN employee e1 ON kpr.employeeId = e1.employeeId 
         WHERE kpr.deleted_at IS NULL
           AND kpr.status = 'Pending'
       `;
@@ -118,7 +121,8 @@ LEFT JOIN employee emp ON kpr.ratedByEmployeeId = emp.employeeId
 WHERE 
     kpr.employeeId = ? 
     AND kpr.deleted_at IS NULL 
-    AND kpr.status = 'approve';
+    AND kpr.status = 'approve'
+        ORDER BY kpi.kraId, kpr.kpiId;;
 
         `;
 

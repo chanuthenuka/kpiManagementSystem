@@ -10,6 +10,8 @@ const RatingApprovals = () => {
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [selectedManager, setSelectedManager] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState("");
 
   // Fetch ratings with departmentId filter
   const fetchRatings = async () => {
@@ -81,7 +83,7 @@ const RatingApprovals = () => {
           newRatings[ratingId] ||
           ratings.find((r) => r.kpiRatingId === ratingId).rating,
         feedback:
-          newFeedbacks[ratingId] ||
+          newFeedbacks[ratingId] || 
           ratings.find((r) => r.kpiRatingId === ratingId).feedback,
         status: status.toLowerCase(),
       }));
@@ -106,6 +108,16 @@ const RatingApprovals = () => {
     }
   };
 
+  const filteredRatings = ratings.filter((rating) => {
+    const matchesManager = selectedManager
+      ? rating.ratedByEmployee === selectedManager
+      : true;
+    const matchesEmployee = selectedEmployee
+      ? rating.fullName === selectedEmployee
+      : true;
+    return matchesManager && matchesEmployee;
+  });
+
   return (
     <div className="flex bg-gray-100 min-h-screen">
       <Sidebar />
@@ -119,10 +131,7 @@ const RatingApprovals = () => {
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-semibold">Pending Approvals</h2>
             <div className="mb-4 flex gap-4 items-center">
-              <label
-                htmlFor="department"
-                className="text-sm font-medium text-gray-700"
-              >
+              <label className="text-sm font-medium text-gray-700">
                 Filter by Department:
               </label>
               <select
@@ -138,13 +147,47 @@ const RatingApprovals = () => {
                   </option>
                 ))}
               </select>
+
+              <label className="text-sm font-medium text-gray-700">
+                Manager:
+              </label>
+              <select
+                className="border rounded px-3 py-1 text-sm"
+                value={selectedManager}
+                onChange={(e) => setSelectedManager(e.target.value)}
+              >
+                <option value="">All</option>
+                {[...new Set(ratings.map((r) => r.ratedByEmployee))].map(
+                  (manager) => (
+                    <option key={manager} value={manager}>
+                      {manager}
+                    </option>
+                  )
+                )}
+              </select>
+
+              <label className="text-sm font-medium text-gray-700">
+                Employee:
+              </label>
+              <select
+                className="border rounded px-3 py-1 text-sm"
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+              >
+                <option value="">All</option>
+                {[...new Set(ratings.map((r) => r.fullName))].map((emp) => (
+                  <option key={emp} value={emp}>
+                    {emp}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <table className="w-full text-sm text-left border rounded overflow-hidden">
             <thead className="bg-gray-200">
               <tr>
-                <th className="px-3 py-2">Select</th>
+                <th className="px-3 py-2">Employee</th>
                 <th className="px-3 py-2">KRA</th>
                 <th className="px-3 py-2">KPI</th>
                 <th className="px-3 py-2">Month</th>
@@ -153,6 +196,7 @@ const RatingApprovals = () => {
                 <th className="px-3 py-2">Manager</th>
                 <th className="px-3 py-2">New Rating</th>
                 <th className="px-3 py-2">New Feedback</th>
+                <th className="px-3 py-2">Select</th>
               </tr>
             </thead>
             <tbody>
@@ -163,15 +207,9 @@ const RatingApprovals = () => {
                   </td>
                 </tr>
               ) : ratings.length > 0 ? (
-                ratings.map((rating) => (
+                filteredRatings.map((rating) => (
                   <tr key={rating.kpiRatingId} className="border-b">
-                    <td className="px-3 py-2">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4"
-                        onChange={() => handleSelectRating(rating.kpiRatingId)}
-                      />
-                    </td>
+                    <td className="px-3 py-2">{rating.fullName}</td>
                     <td className="px-3 py-2">{rating.kraDescription}</td>
                     <td className="px-3 py-2">{rating.kpiDescription}</td>
                     <td className="px-3 py-2">{rating.month}</td>
@@ -179,14 +217,31 @@ const RatingApprovals = () => {
                     <td className="px-3 py-2">{rating.feedback}</td>
                     <td className="px-3 py-2">{rating.ratedByEmployee}</td>
                     <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        className="w-full border rounded px-2 py-1 text-xs"
-                        value={newRatings[rating.kpiRatingId] ?? rating.rating}
-                        onChange={(e) =>
-                          handleRatingChange(rating.kpiRatingId, e.target.value)
-                        }
-                      />
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          className="w-full border rounded px-2 py-1 text-xs"
+                          value={
+                            newRatings[rating.kpiRatingId] ?? rating.rating
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d{0,3}$/.test(value)) {
+                              const intVal = parseInt(value, 10);
+                              if (
+                                value === "" ||
+                                (Number.isInteger(intVal) &&
+                                  intVal >= 0 &&
+                                  intVal <= 100)
+                              ) {
+                                handleRatingChange(rating.kpiRatingId, value);
+                              }
+                            }
+                          }}
+                        />
+                      </td>
                     </td>
                     <td className="px-3 py-2">
                       <input
@@ -201,6 +256,13 @@ const RatingApprovals = () => {
                             e.target.value
                           )
                         }
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4"
+                        onChange={() => handleSelectRating(rating.kpiRatingId)}
                       />
                     </td>
                   </tr>

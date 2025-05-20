@@ -190,18 +190,6 @@ const ManageKRAs = () => {
                 ))}
               </select>
 
-              {/* Filter by Year Dropdown */}
-              <select
-                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 transition-all duration-300"
-                value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
-              >
-                {filterYears.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <div className="flex space-x-4 justify-center">
@@ -225,6 +213,22 @@ const ManageKRAs = () => {
               >
                 Update
               </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              
+              {/* Filter by Year Dropdown */}
+              <select
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 transition-all duration-300"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+              >
+                {filterYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Table */}

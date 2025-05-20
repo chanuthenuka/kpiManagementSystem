@@ -228,23 +228,7 @@ const KPIRatingsForm = ({ selectedUser }) => {
               onChange={(e) => updateRating(index, "rating", e.target.value)}
               className="border p-2 rounded"
             />
-            <input
-              type="number"
-              placeholder="Extra Rating"
-              value={rating.extraRating}
-              onChange={(e) =>
-                updateRating(index, "extraRating", e.target.value)
-              }
-              className="border p-2 rounded"
-            />
-
-            <input
-              type="text"
-              placeholder="Rated By (Your Employee ID)"
-              value={rating.ratedByEmployeeId}
-              readOnly
-              className="border p-2 rounded bg-gray-100 cursor-not-allowed"
-            />
+            
             <textarea
               placeholder="Feedback"
               value={rating.feedback}

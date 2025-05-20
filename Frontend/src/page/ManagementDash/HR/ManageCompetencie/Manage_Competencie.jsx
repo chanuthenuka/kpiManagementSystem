@@ -98,7 +98,11 @@ const OrganizationalForm = () => {
         )
       );
       toast.success("Selected competencies deleted.");
+      setDescription("");
+      setIsSeniorManager(false);
       setSelectedIds([]);
+      setSelectedCompetency(null);
+      setSelectedYear("");
       fetchCompetencies();
     } catch (err) {
       toast.error("Error deleting competencies.");

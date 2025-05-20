@@ -37,7 +37,8 @@ router.get(
             FROM CompetencyRatings cr
             LEFT JOIN Competency c ON cr.competencyId = c.competencyId
             LEFT JOIN employee emp ON cr.ratedByEmployeeId = emp.employeeId
-            WHERE cr.employeeId = ? AND cr.deleted_at IS NULL;
+            WHERE cr.employeeId = ? AND cr.deleted_at IS NULL
+            order by cr.competencyId;
         `;
 
       db.query(sql, [id], (err, results) => {
