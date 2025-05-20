@@ -3,18 +3,18 @@ import axios from "axios";
 import Sidebar from "../../../../components/Dash/Sidebar/Sidebar";
 import KpiRatingDetails from "./KpiRatingDetails";
 import EmployeeKPIReport from "./EmployeeKpiReport";
+import EmployeeCompetencyReport from "./EmployeeCompetencyReport"; // Import the new report
 
 const ReportGeneration = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
-  const [departments, setDepartments] = useState([]); // NEW - to store department list
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState(null); // NEW - selected department
+  const [departments, setDepartments] = useState([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
 
-  const [filteredEmployees, setFilteredEmployees] = useState([]); // NEW - employees filtered by department
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
 
   useEffect(() => {
-    // Fetch Departments
     const fetchDepartments = async () => {
       try {
         const deptResponse = await axios.get(
@@ -25,14 +25,13 @@ const ReportGeneration = () => {
         );
         setDepartments(deptResponse.data);
         if (deptResponse.data.length > 0) {
-          setSelectedDepartmentId(deptResponse.data[0].departmentId); // Set initial department
+          setSelectedDepartmentId(deptResponse.data[0].departmentId);
         }
       } catch (error) {
         console.error("Failed to fetch departments:", error);
       }
     };
 
-    // Fetch Employees (your original code)
     const fetchEmployees = async () => {
       try {
         const empResponse = await axios.get(
@@ -58,7 +57,6 @@ const ReportGeneration = () => {
       );
       setFilteredEmployees(filtered);
 
-      // Set selected employee to first filtered employee or null if none
       if (filtered.length > 0) {
         setSelectedEmployeeId(filtered[0].employeeId);
       } else {
@@ -83,10 +81,10 @@ const ReportGeneration = () => {
       <Sidebar />
 
       <div className="w-full sm:w-3/4 md:w-2/3 lg:w-4/5 p-8 mt-20 space-y-16">
-        {/* Report 1 */}
+        {/* Report 1 - KPI Summary */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Report 1
+            Report 1 - KPI Summary
           </h2>
 
           {/* Department Selector */}
@@ -129,29 +127,37 @@ const ReportGeneration = () => {
               value={selectedEmployeeId}
               onChange={(e) => setSelectedEmployeeId(e.target.value)}
             >
-              {filteredEmployees.map(
-                (
-                  emp // <-- Change here: use filteredEmployees instead of employees
-                ) => (
-                  <option
-                    key={emp.employeeId}
-                    value={emp.employeeId}
-                    className="text-black"
-                  >
-                    {emp.employeeId} - {emp.fullName}
-                  </option>
-                )
-              )}
+              {filteredEmployees.map((emp) => (
+                <option
+                  key={emp.employeeId}
+                  value={emp.employeeId}
+                  className="text-black"
+                >
+                  {emp.employeeId} - {emp.fullName}
+                </option>
+              ))}
             </select>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <EmployeeKPIReport employeeId={selectedEmployeeId} />
           </div>
         </div>
-        {/* Report 2 */}
+
+        {/* Report 2 - Competency Ratings */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Report 2
+            Report 2 - Competency Ratings
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <EmployeeCompetencyReport employeeId={selectedEmployeeId} />
+          </div>
+        </div>
+
+        {/* Report 3 - KPI Rating Details */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+            Report 3 - KPI Rating Details
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <KpiRatingDetails employeeId={selectedEmployeeId} />
