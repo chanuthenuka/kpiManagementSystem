@@ -69,7 +69,7 @@ const View_rating = () => {
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                        Employee ID
+                        Employee Number
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                         Name
@@ -83,7 +83,7 @@ const View_rating = () => {
                     {users.map((user) => (
                       <tr key={user.employeeId}>
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                          {user.employeeId}
+                          {user.employeeNumber}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700">
                           {user.employeeName}

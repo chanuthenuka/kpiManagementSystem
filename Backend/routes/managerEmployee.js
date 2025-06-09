@@ -137,7 +137,7 @@ router.delete(
 );
 
 
-//get emplyee by managerId
+//get employee with the manager
 router.get(
   "/getEmployeesByManagerId",
   authorizePermissions([
@@ -152,6 +152,7 @@ router.get(
           me.managerId,
           manager.fullName AS managerName,
           e.employeeId,
+          e.employeeNumber,
           e.fullName AS employeeName,
           e.departmentId,
           d.name AS departmentName

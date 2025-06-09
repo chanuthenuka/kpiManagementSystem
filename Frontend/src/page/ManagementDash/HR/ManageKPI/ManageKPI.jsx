@@ -9,13 +9,12 @@ import PendingRequestPopup from "./PendingRequestPopup.jsx";
 const ManageKPIs = () => {
   const years = [
     "Year",
-    "2020",
-    "2021",
-    "2022",
-    "2023",
     "2024",
     "2025",
     "2026",
+    "2027",
+    "2028",
+    "2029",
   ];
 
   const [departments, setDepartments] = useState([]);
@@ -27,7 +26,6 @@ const ManageKPIs = () => {
   const [selectedKPIs, setSelectedKPIs] = useState([]);
   const [editingKpiId, setEditingKpiId] = useState(null);
   const [selectedYear, setSelectedYear] = useState("");
-  const [isManager, setIsManager] = useState(false);
   const [isPendingPopupOpen, setIsPendingPopupOpen] = useState(false);
   const [selectedDeptId, setSelectedDeptId] = useState("");
   const [departmentId, setDepartmentId] = useState("");

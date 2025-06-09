@@ -27,7 +27,8 @@ const Login = () => {
 
       if (res.data?.data) {
         console.log("Login success:");
-        const { permissions, employeeId, roleId, roleName } = res.data.data;
+        const { permissions, employeeId, roleId, roleName, departmentId } =
+          res.data.data;
 
         // Store all necessary data in localStorage
         localStorage.setItem("permissions", JSON.stringify(permissions));
@@ -35,6 +36,7 @@ const Login = () => {
         localStorage.setItem("email", email);
         localStorage.setItem("roleId", roleId);
         localStorage.setItem("roleName", roleName);
+        localStorage.setItem("departmentId", departmentId);
 
         if (rememberMe) {
           localStorage.setItem("email", email);

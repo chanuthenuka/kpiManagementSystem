@@ -7,110 +7,6 @@ const passport = require("passport");
 const authorizePermissions = require("../middlewares/authMiddleware");
 const e = require("express");
 
-// Employee Login
-// router.post("/login", async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const sql = "SELECT * FROM employee WHERE email = ? AND deleted_at IS NULL";
-//     db.query(sql, [email], async (err, results) => {
-//       if (err) {
-//         console.error("Database error:", err);
-//         return res.status(500).json({ error: "Internal Server Error" });
-//       }
-
-//       if (results.length === 0) {
-//         return res.status(400).json({ message: "Invalid email or password" });
-//       }
-
-//       const employee = results[0];
-//       const isPasswordValid = await bcrypt.compare(password, employee.password);
-//       if (!isPasswordValid) {
-//         return res.status(400).json({ message: "Invalid email or password" });
-//       }
-
-//       // Fetch role name
-//       const roleQuery =
-//         "SELECT name FROM role WHERE roleId = ? AND deleted_at IS NULL";
-//       db.query(roleQuery, [employee.roleId], (err, roleResults) => {
-//         if (err) {
-//           console.error("Role fetch error:", err);
-//           return res.status(500).json({ error: "Internal Server Error" });
-//         }
-
-//         if (roleResults.length === 0) {
-//           return res.status(400).json({ message: "Role not found" });
-//         }
-
-//         const roleName = roleResults[0].name;
-
-//         // Fetch permission IDs
-//         const permissionQuery = `
-//             SELECT p.action FROM rolePermissions rp
-//             JOIN permission p ON rp.permissionId = p.permissionId
-//             WHERE rp.roleId = ? AND rp.deleted_at IS NULL AND p.deleted_at IS NULL`;
-
-//         db.query(
-//           permissionQuery,
-//           [employee.roleId],
-//           (err, permissionResults) => {
-//             if (err) {
-//               console.error("Permission fetch error:", err);
-//               return res.status(500).json({ error: "Internal Server Error" });
-//             }
-
-//             const permissions = permissionResults.map((perm) => perm.action);
-//             const token = generateToken({
-//               id: employee.id,
-//               role: employee.roleId,
-//             });
-
-//             const employeeDetails = {
-//               id: employee.id,
-//               email: employee.email,
-//               fullName: employee.fullName,
-//               firstName: employee.firstName,
-//               lastName: employee.lastName,
-//               NIC: employee.NIC,
-//               designation: employee.Designation,
-//               employeeStatus: employee.employeeStatus,
-//               isManager: employee.isManager,
-//               roleId: employee.roleId,
-//               roleName: roleName,
-//               permissions: permissions,
-//             };
-//             console.log(employeeDetails);
-//             res.cookie("employee_details", JSON.stringify(employeeDetails), {
-//               httpOnly: true,
-//               secure: false,  // set to true in production
-//               sameSite: "Lax",
-//               maxAge: 86400000, // 1 day
-//             });
-
-//             res.cookie("jwt_token", token, {
-//               httpOnly: true,
-//               secure: false,  // set to true in production
-//               sameSite: "Lax",
-//               maxAge: 86400000, // 1 day
-//             });
-
-//             res.json({
-//               message: "Login successful",
-//               data: {
-//                 employee: employeeDetails,
-//                 token: token,
-//               },
-//             });
-//           }
-//         );
-//       });
-//     });
-//   } catch (err) {
-//     console.error("Unexpected error:", err);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
-
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -120,6 +16,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ msg: "Invalid credentials" });
 
     const user = results[0];
+    const departmentId = user.departmentId;
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ msg: "Invalid credentials" });
 
@@ -172,6 +70,7 @@ router.post("/login", async (req, res) => {
             roleId, // Included in the response
             roleName,
             permissions,
+            departmentId: user.departmentId,
           },
         });
       });

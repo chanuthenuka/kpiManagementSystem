@@ -8,11 +8,13 @@ const RatingApprovals = () => {
   const [newRatings, setNewRatings] = useState({}); // Track rating changes
   const [newFeedbacks, setNewFeedbacks] = useState({}); // Track feedback changes
   const [departments, setDepartments] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [selectedManager, setSelectedManager] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectAll, setSelectAll] = useState(false);
+  const storedDeptId = localStorage.getItem("departmentId");
+  const [selectedDept] = useState(storedDeptId);
+
 
   // Fetch ratings with departmentId filter
   const fetchRatings = async () => {
@@ -20,7 +22,7 @@ const RatingApprovals = () => {
     try {
       const response = await axios.get(
         `http://localhost:5000/api/kpi-ratings/employee/ratings${
-          selectedDepartment ? `?departmentId=${selectedDepartment}` : ""
+          selectedDept ? `?departmentId=${selectedDept}` : ""
         }`,
         { withCredentials: true }
       );
@@ -48,7 +50,7 @@ const RatingApprovals = () => {
 
     fetchRatings();
     fetchDepartments();
-  }, [selectedDepartment]); // Re-fetch ratings when selectedDepartment changes
+  }, [selectedDept]); // Re-fetch ratings when selectedDepartment changes
 
   // Handle selection of ratings
   const handleSelectRating = (ratingId) => {
@@ -148,8 +150,8 @@ const RatingApprovals = () => {
               <select
                 id="department"
                 className="border rounded px-3 py-1 text-sm"
-                value={selectedDepartment}
-                onChange={(e) => setSelectedDepartment(e.target.value)}
+                value={selectedDept}
+                disabled
               >
                 <option value="">All Departments</option>
                 {departments.map((dept) => (

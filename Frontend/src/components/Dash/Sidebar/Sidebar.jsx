@@ -64,7 +64,7 @@ const Sidebar = () => {
       label: "Rating Approvals",
       permission: "Approve Ratings",
     },
-    
+
     {
       path: "/assign-Manager",
       label: "Assign Manager",
@@ -87,7 +87,7 @@ const Sidebar = () => {
       permission: "HOD Employee View",
     },
     {
-      path: "/rate-manger",
+      path: "/rate-managers",
       label: "Rate Managers",
       permission: "rate managers",
     },
@@ -111,11 +111,11 @@ const Sidebar = () => {
       label: "Request KPI Changes",
       permission: "Request KPI Changes",
     },
-    
-    { 
-      path: "/report", 
-      label: "Reports", 
-      permission: "Report Generation" 
+
+    {
+      path: "/report",
+      label: "Reports",
+      permission: "Report Generation",
     },
   ];
 

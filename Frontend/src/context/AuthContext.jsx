@@ -26,12 +26,14 @@ export const AuthProvider = ({ children }) => {
       const userData = {
         employeeId: response.data.data.employeeId,
         roleName: response.data.data.roleName,
+        departmentId: response.data.data.departmentId,
         permissions: response.data.data.permissions,
       };
 
       console.log(`[LOGIN SUCCESS] User logged in:`, {
         employeeId: userData.employeeId,
         roleName: userData.roleName,
+        departmentId: userData.departmentId,
         permissions: userData.permissions,
       });
 

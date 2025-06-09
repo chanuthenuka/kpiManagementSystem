@@ -16,6 +16,7 @@ const EmployeeKPIReport = ({ employeeId }) => {
   const [data, setData] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [employeeName, setEmployeeName] = useState('');
+  const [employeeNumber, setEmployeeNumber] = useState('');
 
   const fetchData = async () => {
   if (!employeeId) return; // prevent fetching if no employeeId
@@ -36,8 +37,38 @@ const EmployeeKPIReport = ({ employeeId }) => {
   }
 };
 
+const fetchEmployeeName = async () => {
+  if (!employeeId) return;
+
+  try {
+    const res = await axios.get(`http://localhost:5000/api/employees/${employeeId}`, {
+      withCredentials: true,
+    });
+    setEmployeeName(res.data.fullName || '');
+  } catch (err) {
+    console.error('Failed to fetch employee name:', err.response?.data || err.message);
+    setEmployeeName('');
+  }
+};
+
+const fetchEmployeeNumber = async () => {
+  if (!employeeId) return;
+
+  try {
+    const res = await axios.get(`http://localhost:5000/api/employees/${employeeId}`, {
+      withCredentials: true,
+    });
+    setEmployeeNumber(res.data.employeeNumber || '');
+  } catch (err) {
+    console.error('Failed to fetch employee number:', err.response?.data || err.message);
+    setEmployeeNumber('');
+  }
+};
+
   useEffect(() => {
     fetchData();
+    fetchEmployeeName();
+    fetchEmployeeNumber();
   }, [selectedYear, employeeId]);
 
   return (
@@ -48,7 +79,7 @@ const EmployeeKPIReport = ({ employeeId }) => {
 
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <p><strong>Employee ID:</strong> {employeeId}</p>
+          <p><strong>Employee ID:</strong> {employeeNumber}</p>
           <p><strong>Employee Name:</strong> {employeeName || '-'}</p>
         </div>
         <select
