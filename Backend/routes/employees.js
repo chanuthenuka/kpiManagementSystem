@@ -97,6 +97,26 @@ router.get(
   }
 );
 
+// Get all managers
+router.get(
+  "/managers",
+  passport.authenticate("jwt", { session: false }),
+  authorizePermissions(["View Users", "View Ratings", "Get_emplyees"]),
+  async (req, res) => {
+    try {
+      const sql =
+        "SELECT * FROM employee WHERE deleted_at IS NULL and roleId IN(2, 5) ";
+      db.query(sql, (err, results) => {
+        if (err) throw err;
+        res.json(results);
+      });
+    } catch (err) {
+      console.error("Error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
 //get employee by id
 router.get(
   "/:employeeId",

@@ -10,7 +10,7 @@ router.use(passport.authenticate("jwt", { session: false }));
 // Get all competencies
 router.get(
   "/",
-  authorizePermissions(["Manage Competencies", "Competency_get_post"]),
+  authorizePermissions(["Manage Competencies", "Competency_get_post", "Rate Managers"]),
   async (req, res) => {
     try {
       const sql = "SELECT * FROM Competency WHERE deleted_at IS NULL";

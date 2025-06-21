@@ -34,7 +34,6 @@ import OnRatings from "./page/ManagementDash/EMP/OnRating/Onratings";
 //Extra
 import ManageDepartment from "./page/ManagementDash/HR/ManageDepartment/ManageDepartment";
 import RateManagers from "./page/ManagementDash/HOD/Ratemanagers/Ratemangers";
-import HodRatingApprovals from "./page/ManagementDash/HOD/HodRatingApprovals/HodRatingApprovals";
 
 //hr_emp
 import View_All_ratings from "./page/ManagementDash/HR_Emp/View_All_ratings";
@@ -109,7 +108,6 @@ function App() {
           <Route path="/hod-kpichanges" element={<HOD_KPIChanges />} />
           <Route path="/assign-Manager" element={<AssignManager />} />
           <Route path="/rate-managers" element={<RateManagers />} />
-          <Route path="/rating-app" element={<HodRatingApprovals />} />
           <Route path="/view-all-ratings" element={<View_All_ratings />} />
           <Route path="/view-all-ratings-two/:id" element={<View_All_rating2 />} />
         </Route>

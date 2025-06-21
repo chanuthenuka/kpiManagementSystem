@@ -12,6 +12,8 @@ const AssignManager = () => {
   const [data, setData] = useState([]);
   const [userRoleId, setUserRoleId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const selectedDept = localStorage.getItem("departmentId") || "";
 
   useEffect(() => {
     // Retrieve roleId from localStorage
@@ -23,6 +25,22 @@ const AssignManager = () => {
       setUserRoleId(0); // Fallback to default behavior
       toast.error("User role not found. Using default settings.");
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/department", {
+          withCredentials: true,
+        });
+        setDepartments(res.data);
+      } catch (error) {
+        console.error("Error fetching departments", error);
+        toast.error("Failed to load departments");
+      }
+    };
+
+    fetchDepartments();
   }, []);
 
   useEffect(() => {
@@ -43,9 +61,6 @@ const AssignManager = () => {
         if (userRoleId === 6) {
           employeeRoleId = 4;
           managerRoleId = 5;
-        } else if (userRoleId === 3) {
-          employeeRoleId = 1;
-          managerRoleId = 2;
         }
 
         const filteredEmployees = result.filter(
@@ -153,6 +168,18 @@ const AssignManager = () => {
     }
   };
 
+  const filteredEmployees = selectedDept
+    ? employees.filter((emp) => emp.departmentId == selectedDept)
+    : employees;
+
+  const filteredManagers = selectedDept
+    ? managers.filter((mgr) => mgr.departmentId == selectedDept)
+    : managers;
+
+  const filteredAssignments = selectedDept
+    ? data.filter((item) => item.departmentId == selectedDept)
+    : data;
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
       <Sidebar />
@@ -167,6 +194,24 @@ const AssignManager = () => {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Bulk Assignment Form */}
             <div className="flex-1 bg-gray-50 rounded-xl p-6 shadow-sm">
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Filter by Department
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                  value={selectedDept}
+                  disabled
+                >
+                  <option value="">All Departments</option>
+                  {departments.map((dept) => (
+                    <option key={dept.departmentId} value={dept.departmentId}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Search Employees
@@ -193,9 +238,10 @@ const AssignManager = () => {
                         </th>
                       </tr>
                     </thead>
+
                     <tbody>
-                      {employees.length > 0 ? (
-                        employees
+                      {filteredEmployees.length > 0 ? (
+                        filteredEmployees
                           .filter((emp) =>
                             emp.fullName
                               .toLowerCase()
@@ -211,6 +257,7 @@ const AssignManager = () => {
                               <td className="py-3 px-4 text-gray-700">
                                 {emp.fullName}
                               </td>
+
                               <td className="py-3 px-4 text-center">
                                 <input
                                   type="checkbox"
@@ -243,20 +290,18 @@ const AssignManager = () => {
               <div className="space-y-4">
                 <div>
                   <label
-                    htmlFor="manager"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
                     Select Manager
                   </label>
                   <select
-                    id="manager"
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white text-gray-800 transition-all duration-300"
                     value={selectedManager}
                     onChange={(e) => setSelectedManager(e.target.value)}
                   >
                     <option value="">Choose a Manager</option>
-                    {managers.length > 0 ? (
-                      managers.map((manager) => (
+                    {filteredManagers.length > 0 ? (
+                      filteredManagers.map((manager) => (
                         <option
                           key={manager.employeeId}
                           value={manager.employeeId}
@@ -271,6 +316,7 @@ const AssignManager = () => {
                     )}
                   </select>
                 </div>
+                
                 <div className="flex gap-4">
                   <button
                     className="flex-1 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
@@ -309,10 +355,10 @@ const AssignManager = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {data.length > 0 ? (
-                      data.map((item, index) => (
+                    {filteredAssignments.length > 0 ? (
+                      filteredAssignments.map((item, index) => (
                         <tr
-                          key={item.employeeId || index}
+                          key={item.employeeId}
                           className={
                             index % 2 === 0
                               ? "bg-white hover:bg-blue-50"

@@ -178,4 +178,48 @@ router.get(
     }
   }
 );
+
+//get managers, employee with the manager
+router.get(
+  "/getManagersAndEmployeesByManagerId",
+  authorizePermissions([
+    "Manage Users",
+    "View Employee Ratings",
+    "Get_Assigned_emp_by_managerid",
+  ]),
+  async (req, res) => {
+    try {
+      const sql = `
+        SELECT  
+          me.managerId,
+          manager.fullName AS managerName,
+          e.employeeId,
+          e.employeeNumber,
+          e.fullName AS employeeName,
+          e.departmentId,
+          d.name AS departmentName
+        FROM employee e 
+        LEFT JOIN ManagerEmployees me ON me.employeeId = e.employeeId
+        LEFT JOIN employee manager ON me.managerId = manager.employeeId
+        LEFT JOIN department d ON e.departmentId = d.departmentId
+        WHERE me.deleted_at IS NULL
+        AND e.deleted_at IS NULL
+        AND manager.deleted_at IS NULL
+        AND e.roleId NOT IN (3, 6);
+      `;
+
+      db.query(sql, (err, results) => {
+        if (err) {
+          console.error("Database query error:", err);
+          return res.status(500).json({ error: "Database query error" });
+        }
+        res.json(results);
+      });
+    } catch (err) {
+      console.error("Error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
 module.exports = router;

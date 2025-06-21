@@ -42,8 +42,14 @@ const Sidebar = () => {
       label: "Employee Management",
       permission: "Register Users",
     },
-    { path: "/manage-kpi", label: "Manage KPIs", permission: "Manage KPIs" },
-    { path: "/manage-kra", label: "Manage KRAS", permission: "Manage Kra" },
+    { path: "/manage-kpi", 
+      label: "Manage KPIs", 
+      permission: "Manage KPIs" 
+    },
+    { path: "/manage-kra", 
+      label: "Manage KRAS", 
+      permission: "Manage Kra" 
+    },
     {
       path: "/manage-Competenice",
       label: "Manage Competencies",
@@ -89,7 +95,7 @@ const Sidebar = () => {
     {
       path: "/rate-managers",
       label: "Rate Managers",
-      permission: "rate managers",
+      permission: "Rate Managers",
     },
     {
       path: "/hod-ratingApproval",
@@ -140,7 +146,7 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`min-w-[350px] max-w-[350px] p-6 bg-gradient-to-b ${
+      className={`min-w-[280px] p-6 bg-gradient-to-b ${
         roleBackgrounds[roleId] || "from-black to-gray-900"
       } h-screen flex flex-col shadow-xl overflow-hidden`}
     >

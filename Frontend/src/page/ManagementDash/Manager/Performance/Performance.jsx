@@ -20,7 +20,7 @@ const Manager_Performance = () => {
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",
+        "http://localhost:5000/api/manager-employees/getManagersAndEmployeesByManagerId",
         { withCredentials: true }
       );
 
