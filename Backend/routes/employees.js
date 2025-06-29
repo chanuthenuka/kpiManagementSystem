@@ -44,7 +44,8 @@ router.post("/login", async (req, res) => {
       const roleName = roleResults[0].name;
 
       const permissionQuery = `
-        SELECT p.action FROM rolePermissions rp
+        SELECT p.action 
+        FROM rolePermissions rp
         JOIN permission p ON rp.permissionId = p.permissionId
         WHERE rp.roleId = ? AND rp.deleted_at IS NULL AND p.deleted_at IS NULL`;
 
@@ -67,7 +68,7 @@ router.post("/login", async (req, res) => {
           msg: "Login successful",
           data: {
             employeeId: user.employeeId,
-            roleId, // Included in the response
+            roleId,
             roleName,
             permissions,
             departmentId: user.departmentId,
@@ -227,7 +228,7 @@ router.put(
       firstname,
       lastname,
       email,
-      password, // optional
+      password,
       employeeNumber,
       Designation,
       employeeStatus,

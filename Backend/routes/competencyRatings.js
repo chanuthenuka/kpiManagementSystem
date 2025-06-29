@@ -370,26 +370,45 @@ router.get("/employee/:employeeId/year/:year", async (req, res) => {
 
     // Prepare parameters for months: year, employeeId for each month twice (in subquery and join)
     const params = [
-        year, employeeId, year, employeeId, year, employeeId,
-        year, employeeId, year, employeeId, year, employeeId,
-        year, employeeId, year, employeeId, year, employeeId,
-        year, employeeId, year, employeeId, year, employeeId,
-        year,  // for kra.year = ?
-  employeeId // for EXISTS subquery
-      ];
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year, // for kra.year = ?
+      employeeId, // for EXISTS subquery
+    ];
 
-      db.query(sql, params, (err, results) => {
-        if (err) {
-          console.error("Query error:", err);
-          return res.status(500).json({ error: "Internal Server Error" });
-        }
-        res.json(results);
-      });
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    db.query(sql, params, (err, results) => {
+      if (err) {
+        console.error("Query error:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      res.json(results);
+    });
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
-
 
 module.exports = router;

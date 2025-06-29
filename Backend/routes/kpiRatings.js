@@ -7,7 +7,7 @@ const authorizePermissions = require("../middlewares/authMiddleware");
 // Protect all routes
 router.use(passport.authenticate("jwt", { session: false }));
 
-// Get all KPI ratings
+// Get all Pending KPI ratings
 router.get(
   "/",
   authorizePermissions(["View Ratings", "Get All Kpi Ratings"]),
@@ -26,7 +26,7 @@ router.get(
   }
 );
 
-//get all KPI ratings with kra
+//get all Pending KPI ratings with kra
 router.get(
   "/employee/ratings",
   authorizePermissions(["Get All Kpi Ratings"]),

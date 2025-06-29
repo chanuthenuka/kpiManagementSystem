@@ -1,4 +1,4 @@
-const db = require('../db/db'); // Adjust path as needed
+const db = require('../db/db');
 
 const authorizePermissions = (requiredPermissions) => {
   return async (req, res, next) => {

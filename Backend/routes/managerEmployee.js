@@ -85,8 +85,8 @@ router.put("/:id", authorizePermissions(["Manage Users"]), async (req, res) => {
   const { managerId, employeeId } = req.body;
 
   try {
-    const sql = `UPDATE managerEmployees SET managerId = ?, employeeId = ? WHERE id = ? AND deleted_at IS NULL`;
-    db.query(sql, [managerId, employeeId, id], (err, result) => {
+    const sql = `UPDATE managerEmployees SET managerId = ?, employeeId = ? AND deleted_at IS NULL`;
+    db.query(sql, [managerId, employeeId], (err, result) => {
       if (err) throw err;
       if (result.affectedRows > 0) {
         res.json({ message: "Mapping updated successfully" });

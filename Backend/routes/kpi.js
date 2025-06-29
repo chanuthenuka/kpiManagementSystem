@@ -162,8 +162,6 @@ router.get("/get-kra", async (req, res) => {
   }
 });
 
-module.exports = router;
-
 // get kpi according to year
 router.get("/get-kpi-by-year", async (req, res) => {
   try {
