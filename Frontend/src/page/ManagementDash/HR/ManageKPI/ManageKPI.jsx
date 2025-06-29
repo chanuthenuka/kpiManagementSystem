@@ -3,20 +3,10 @@ import Sidebar from "../../../../components/Dash/Sidebar/Sidebar";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
 import PendingRequestPopup from "./PendingRequestPopup.jsx";
- 
-const ManageKPIs = () => {
-  const years = [
-    "Year",
-    "2024",
-    "2025",
-    "2026",
-    "2027",
-    "2028",
-    "2029",
-  ];
 
+const ManageKPIs = () => {
+  const years = ["Year", "2026", "2025", "2024"];
   const [departments, setDepartments] = useState([]);
   const [kras, setKras] = useState([]);
   const [selectedKRA, setSelectedKRA] = useState("");
@@ -32,8 +22,6 @@ const ManageKPIs = () => {
   const [filterYear, setFilterYear] = useState("");
   const [prevWeightageSum, setPrevWeightageSum] = useState(0);
 
-  const navigate = useNavigate();
-
   // Filter KPIs based on selected department and year
   const filteredKPIs = kpis.filter((kpi) => {
     const matchesDept = selectedDeptId
@@ -44,14 +32,6 @@ const ManageKPIs = () => {
         ? String(kpi.year) === String(filterYear)
         : true;
     return matchesDept && matchesYear;
-  });
-
-  // Filter KRAs based on filterYear, but allow selectedKRA to persist for editing
-  const filteredKras = kras.filter((kra) => {
-    if (editingKpiId && kra.kraId === selectedKRA) return true; // Keep selected KRA when editing
-    return filterYear && filterYear !== "Year"
-      ? String(kra.year) === String(filterYear)
-      : true;
   });
 
   // Calculate total weightage and trigger alert if sum is 80
@@ -135,15 +115,13 @@ const ManageKPIs = () => {
       );
 
       setSelectedKPIs([]);
-      toast.success("Selected KPIs deleted successfully");
-
       setSelectedKRA("");
       setKpiDescription("");
       setWeightage("");
       setEditingKpiId(null);
-      setSelectedKPIs([]);
       setDepartmentId("");
       setSelectedYear("");
+      toast.success("Selected KPIs deleted successfully");
     } catch (error) {
       console.error("Error deleting KPIs:", error);
       toast.error("Error deleting one or more KPIs.");
@@ -211,8 +189,12 @@ const ManageKPIs = () => {
           axios.get("http://localhost:5000/api/department", {
             withCredentials: true,
           }),
-          axios.get("http://localhost:5000/api/kra", { withCredentials: true }),
-          axios.get("http://localhost:5000/api/kpi", { withCredentials: true }),
+          axios.get("http://localhost:5000/api/kra", {
+            withCredentials: true,
+          }),
+          axios.get("http://localhost:5000/api/kpi", { 
+            withCredentials: true 
+          }),
         ]);
         setDepartments(deptRes.data);
         setKras(kraRes.data);
@@ -330,7 +312,7 @@ const ManageKPIs = () => {
               Weightage
             </label>
             <input
-              type="text"
+              type="number"
               value={weightage}
               onChange={(e) => {
                 const value = e.target.value;
@@ -363,7 +345,6 @@ const ManageKPIs = () => {
                 Save
               </button>
             )}
-
             <button
               onClick={handleDeleteSelected}
               className="px-6 py-2 bg-black text-white rounded-xl font-semibold shadow-md hover:bg-red-700 transition-all duration-300 w-32"

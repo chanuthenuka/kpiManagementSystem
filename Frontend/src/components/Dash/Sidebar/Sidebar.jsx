@@ -47,7 +47,7 @@ const Sidebar = () => {
       permission: "Manage KPIs" 
     },
     { path: "/manage-kra", 
-      label: "Manage KRAS", 
+      label: "Manage KRAs", 
       permission: "Manage Kra" 
     },
     {
@@ -85,8 +85,7 @@ const Sidebar = () => {
       path: "/emp-emp",
       label: "Employee",
       permission: "View Employee Performance",
-    }, // general access
-    // { path: "/on-rate", label: "On Ratings", permission: "Rate Trainees" },
+    }, 
     {
       path: "/hod-emp",
       label: "HOD Employee",
@@ -117,7 +116,6 @@ const Sidebar = () => {
       label: "Request KPI Changes",
       permission: "Request KPI Changes",
     },
-
     {
       path: "/report",
       label: "Reports",
@@ -193,7 +191,7 @@ const Sidebar = () => {
               Confirm Logout
             </h2>
             <p className="text-gray-400 mb-8 text-center font-medium">
-              Are you sure you want to log out as Admin?
+              Are you sure you want to log out?
             </p>
             <div className="flex justify-end space-x-4">
               <button

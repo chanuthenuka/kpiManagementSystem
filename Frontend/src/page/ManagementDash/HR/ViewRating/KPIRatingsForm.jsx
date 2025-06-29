@@ -6,8 +6,7 @@ const KPIRatingsForm = ({ selectedUser }) => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [kpiOptions, setKpiOptions] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("2025"); // Default to current year
-  const [extraRating, setExtraRating] = useState("");
+  const [selectedYear, setSelectedYear] = useState("2025");
 
   const loggedInEmployeeId = localStorage.getItem("employeeId");
   const years = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"];
@@ -62,22 +61,6 @@ const KPIRatingsForm = ({ selectedUser }) => {
       ]);
     }
   }, [selectedUser, loggedInEmployeeId, selectedYear]);
-
-  const addRating = () => {
-    setKpiRatings([
-      ...kpiRatings,
-      {
-        employeeId: selectedUser?.employeeId || "",
-        kpiId: "",
-        target: "",
-        tasks: "",
-        month: `${selectedYear}-01`,
-        rating: "",
-        extraRating: "",
-        feedback: "",
-      },
-    ]);
-  };
 
   const updateRating = (index, field, value) => {
     const updatedRatings = [...kpiRatings];
@@ -235,7 +218,10 @@ const KPIRatingsForm = ({ selectedUser }) => {
               })}
             </select>
             <input
-              type="text"
+              type="number"
+              min="0"
+              max="100"
+              name="rating"
               placeholder="Rating"
               value={rating.rating}
               onChange={(e) => {

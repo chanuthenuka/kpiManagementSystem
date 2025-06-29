@@ -9,7 +9,7 @@ router.use(passport.authenticate("jwt", { session: false }));
 // Get all Approve KPIs (excluding soft-deleted)
 router.get("/", authorizePermissions(["Get KPI Changes"]), async (req, res) => {
   try {
-    const sql = "SELECT * FROM ApproveKPI WHERE deleted_at IS NULL";
+    const sql = "SELECT * FROM approvekpi a JOIN department d ON a.departmentId = d.departmentId JOIN kra k on a.kraId = k.kraId WHERE a.deleted_at IS NULL";
     db.query(sql, (err, results) => {
       if (err) throw err;
       res.json(results);
@@ -137,6 +137,7 @@ router.get(
       FROM ApproveKPI ak
       JOIN department d ON ak.departmentId = d.departmentId
       JOIN kra kr ON ak.kraId = kr.kraId
+      where ak.deleted_at IS NULL
       ORDER BY ak.approveKpiId DESC
     `;
 

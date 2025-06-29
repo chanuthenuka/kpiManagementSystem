@@ -7,7 +7,11 @@ const RequestKPIChanges = () => {
   const [kras, setKras] = useState([]);
   const [selectedKRA, setSelectedKRA] = useState("");
   const [departments, setDepartments] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState(() => {
+    return localStorage.getItem("departmentId") || "";
+  });
+
+  const [selectedYear, setSelectedYear] = useState("");
 
   const [weightage, setWeightage] = useState("");
   const [kpi, setKpi] = useState("");
@@ -48,7 +52,7 @@ const RequestKPIChanges = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/approve-kpi", // Replace with your actual route
+        "http://localhost:5000/api/approve-kpi",
         {
           status: "Pending",
           weightage,
@@ -102,6 +106,24 @@ const RequestKPIChanges = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Year
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
+                >
+                  <option value="">Select Year</option>
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   KRA
                 </label>
                 <select
@@ -109,14 +131,19 @@ const RequestKPIChanges = () => {
                   onChange={(e) => setSelectedKRA(e.target.value)}
                   className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
                 >
-                  <option value="" disabled>
+                  <option value="">
                     Select a KRA
                   </option>
-                  {kras.map((kra) => (
-                    <option key={kra.kraid} value={kra.kraId}>
-                      {kra.description}
-                    </option>
-                  ))}
+                  {kras
+                    .filter(
+                      (kra) =>
+                        !selectedYear || kra.year?.toString() === selectedYear
+                    )
+                    .map((kra) => (
+                      <option key={kra.kraId} value={kra.kraId}>
+                        {kra.description}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -126,16 +153,12 @@ const RequestKPIChanges = () => {
                 </label>
                 <select
                   value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
                   className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
+                  disabled
                 >
-                  <option value="" disabled>
-                    Select a Department
-                  </option>
                   {departments.map((dept) => (
                     <option key={dept.departmentId} value={dept.departmentId}>
-                      {dept.name}{" "}
-                      {/* or dept.description depending on your column */}
+                      {dept.name}
                     </option>
                   ))}
                 </select>
@@ -148,11 +171,24 @@ const RequestKPIChanges = () => {
                 <input
                   type="text"
                   value={weightage}
-                  onChange={(e) => setWeightage(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d{0,3}$/.test(value)) {
+                      const intVal = parseInt(value, 10);
+                      if (
+                        value === "" ||
+                        (Number.isInteger(intVal) &&
+                          intVal >= 0 &&
+                          intVal <= 100)
+                      ) {
+                        setWeightage(value);
+                    }
+                  }}}
                   className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder-gray-400"
                   placeholder="Weightage"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   KPI

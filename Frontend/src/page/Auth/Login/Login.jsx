@@ -1,18 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom"; // to redirect after login
 import axios from "axios"; // Make sure to install axios using npm or yarn
 
 const Login = () => {
   const [email, setEmail] = useState(() => localStorage.getItem("email") || "");
-  const [password, setPassword] = useState(
-    () => localStorage.getItem("password") || ""
-  );
+  const [password, setPassword] = useState(() => localStorage.getItem("password") || "");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(
-    () => !!localStorage.getItem("email")
-  );
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("email"));
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -33,7 +28,6 @@ const Login = () => {
         // Store all necessary data in localStorage
         localStorage.setItem("permissions", JSON.stringify(permissions));
         localStorage.setItem("employeeId", employeeId);
-        localStorage.setItem("email", email);
         localStorage.setItem("roleId", roleId);
         localStorage.setItem("roleName", roleName);
         localStorage.setItem("departmentId", departmentId);

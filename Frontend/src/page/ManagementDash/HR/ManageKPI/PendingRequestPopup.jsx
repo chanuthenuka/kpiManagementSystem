@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+ 
 const PendingRequestPopup = ({ onClose }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,9 +80,12 @@ const PendingRequestPopup = ({ onClose }) => {
       } else if (action === "Rejected") {
         // Soft delete the request for rejected requests
         const url = `http://localhost:5000/api/approve-kpi/${request.approveKpiId}`;
-        console.log("DELETE URL:", url);
-        const response = await axios.delete(url, { withCredentials: true });
-
+        console.log("PUT URL:", url);
+        const response = await axios.put(
+          url,
+          { status: "Rejected" },
+          { withCredentials: true }
+        );
         if (response.status !== 200) {
           alert("Failed to reject request.");
           return;
@@ -127,10 +130,13 @@ const PendingRequestPopup = ({ onClose }) => {
                 <thead className="bg-gray-300 sticky top-0">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 tracking-wide">
+                      Department
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 tracking-wide">
                       KRA
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 tracking-wide">
-                      KPI Description
+                      KPI
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 tracking-wide">
                       Weightage
@@ -148,7 +154,10 @@ const PendingRequestPopup = ({ onClose }) => {
                         className="hover:bg-gray-50 transition-all duration-300"
                       >
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {item.kraId}
+                          {item.name}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {item.description}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
                           {item.kpi}

@@ -1,20 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const monthsOrder = [
-  'ratingJan', 'ratingFeb', 'ratingMar', 'ratingApr', 'ratingMay', 'ratingJun',
-  'ratingJul', 'ratingAug', 'ratingSep', 'ratingOct', 'ratingNov', 'ratingDec'
+  "ratingJan",
+  "ratingFeb",
+  "ratingMar",
+  "ratingApr",
+  "ratingMay",
+  "ratingJun",
+  "ratingJul",
+  "ratingAug",
+  "ratingSep",
+  "ratingOct",
+  "ratingNov",
+  "ratingDec",
 ];
 
 const monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 const EmployeeCompetencyReport = ({ employeeId }) => {
   const [data, setData] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [employeeName, setEmployeeName] = useState('');
+  const [employeeName, setEmployeeName] = useState("");
+  const [employeeNumber, setEmployeeNumber] = useState("");
 
   const fetchData = async () => {
     if (!employeeId) return;
@@ -27,17 +48,59 @@ const EmployeeCompetencyReport = ({ employeeId }) => {
 
       const competencyData = response.data;
       setData(competencyData);
-
-      // Set name if available in API response (optional)
-      // setEmployeeName(competencyData[0]?.employeeName || '');
     } catch (error) {
-      console.error('Failed to fetch competency data:', error.response?.data || error.message);
+      console.error(
+        "Failed to fetch competency data:",
+        error.response?.data || error.message
+      );
       setData([]);
+    }
+  };
+
+  const fetchEmployeeName = async () => {
+    if (!employeeId) return;
+
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/employees/${employeeId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setEmployeeName(res.data.fullName || "");
+    } catch (err) {
+      console.error(
+        "Failed to fetch employee name:",
+        err.response?.data || err.message
+      );
+      setEmployeeName("");
+    }
+  };
+
+  const fetchEmployeeNumber = async () => {
+    if (!employeeId) return;
+
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/employees/${employeeId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setEmployeeNumber(res.data.employeeNumber || "");
+    } catch (err) {
+      console.error(
+        "Failed to fetch employee number:",
+        err.response?.data || err.message
+      );
+      setEmployeeNumber("");
     }
   };
 
   useEffect(() => {
     fetchData();
+    fetchEmployeeName();
+    fetchEmployeeNumber();
   }, [selectedYear, employeeId]);
 
   return (
@@ -48,8 +111,12 @@ const EmployeeCompetencyReport = ({ employeeId }) => {
 
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <p><strong>Employee ID:</strong> {employeeId}</p>
-          <p><strong>Employee Name:</strong> {employeeName || '-'}</p>
+          <p>
+            <strong>Employee ID:</strong> {employeeId}
+          </p>
+          <p>
+            <strong>Employee Name:</strong> {employeeName || "-"}
+          </p>
         </div>
         <select
           className="border p-2 rounded"
@@ -58,7 +125,11 @@ const EmployeeCompetencyReport = ({ employeeId }) => {
         >
           {Array.from({ length: 5 }).map((_, i) => {
             const year = new Date().getFullYear() - i;
-            return <option key={year} value={year}>{year}</option>;
+            return (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            );
           })}
         </select>
       </div>
@@ -68,7 +139,9 @@ const EmployeeCompetencyReport = ({ employeeId }) => {
           <tr>
             <th className="border px-3 py-2">Competency</th>
             {monthNames.map((month) => (
-              <th key={month} className="border px-3 py-2">{month}</th>
+              <th key={month} className="border px-3 py-2">
+                {month}
+              </th>
             ))}
             <th className="border px-3 py-2">Q1 Avg</th>
             <th className="border px-3 py-2">Q2 Avg</th>
@@ -93,17 +166,31 @@ const EmployeeCompetencyReport = ({ employeeId }) => {
 
               {monthsOrder.map((monthKey) => (
                 <td key={monthKey} className="border px-3 py-1 text-center">
-                  {comp[monthKey] != null ? comp[monthKey] : '-'}
+                  {comp[monthKey] != null ? comp[monthKey] : "-"}
                 </td>
               ))}
 
-              <td className="border px-3 py-1 text-center">{comp.Q1_Average ?? '-'}</td>
-              <td className="border px-3 py-1 text-center">{comp.Q2_Average ?? '-'}</td>
-              <td className="border px-3 py-1 text-center">{comp.Q3_Average ?? '-'}</td>
-              <td className="border px-3 py-1 text-center">{comp.Q4_Average ?? '-'}</td>
-              <td className="border px-3 py-1 text-center">{comp.H1_Average ?? '-'}</td>
-              <td className="border px-3 py-1 text-center">{comp.H2_Average ?? '-'}</td>
-              <td className="border px-3 py-1 text-center">{comp.Year_Average ?? '-'}</td>
+              <td className="border px-3 py-1 text-center">
+                {comp.Q1_Average ?? "-"}
+              </td>
+              <td className="border px-3 py-1 text-center">
+                {comp.Q2_Average ?? "-"}
+              </td>
+              <td className="border px-3 py-1 text-center">
+                {comp.Q3_Average ?? "-"}
+              </td>
+              <td className="border px-3 py-1 text-center">
+                {comp.Q4_Average ?? "-"}
+              </td>
+              <td className="border px-3 py-1 text-center">
+                {comp.H1_Average ?? "-"}
+              </td>
+              <td className="border px-3 py-1 text-center">
+                {comp.H2_Average ?? "-"}
+              </td>
+              <td className="border px-3 py-1 text-center">
+                {comp.Year_Average ?? "-"}
+              </td>
             </tr>
           ))}
         </tbody>

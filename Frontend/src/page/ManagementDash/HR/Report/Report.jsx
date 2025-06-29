@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../../../../components/Dash/Sidebar/Sidebar";
-import KpiRatingDetails from "./KpiRatingDetails";
 import EmployeeKPIReport from "./EmployeeKpiReport";
 import EmployeeCompetencyReport from "./EmployeeCompetencyReport"; // Import the new report
 
 const ReportGeneration = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
-
   const [departments, setDepartments] = useState([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
-
   const [filteredEmployees, setFilteredEmployees] = useState([]);
 
   useEffect(() => {
@@ -101,7 +98,6 @@ const ReportGeneration = () => {
             {/* Department Selector */}
             <div className="mb-8 p-4 bg-white rounded-2xl shadow-lg w-64">
               <label
-                htmlFor="department-select"
                 className="block mb-2 font-semibold text-gray-700"
               >
                 Select Department
@@ -123,7 +119,6 @@ const ReportGeneration = () => {
             {/* Employee Selector */}
             <div className="mb-8 p-4 bg-white rounded-2xl shadow-lg w-64">
               <label
-                htmlFor="employee-select"
                 className="block mb-2 font-semibold text-gray-700"
               >
                 Select Employee
@@ -169,15 +164,6 @@ const ReportGeneration = () => {
           </div>
         </div>
 
-        {/* Report 3 - KPI Rating Details */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Report 3 - KPI Rating Details
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <KpiRatingDetails employeeId={selectedEmployeeId} />
-          </div>
-        </div>
       </div>
     </div>
   );

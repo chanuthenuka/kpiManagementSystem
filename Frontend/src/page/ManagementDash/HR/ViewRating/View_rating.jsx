@@ -18,9 +18,7 @@ const View_rating = () => {
           return;
         }
 
-        const managerId = parseInt(storedEmployeeId, 10); // because localStorage saves strings
-
-        // console.log("Logged in Manager ID:", managerId);
+        const managerId = parseInt(storedEmployeeId, 10);
 
         const response = await axios.get(
           "http://localhost:5000/api/manager-employees/getEmployeesByManagerId",
@@ -60,9 +58,8 @@ const View_rating = () => {
         ) : (
           <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-8 mx-auto mt-20">
             <h1 className="text-4xl font-bold text-gray-900 mb-6">
-              Manage Employees
+              Rate Employees
             </h1>
-
             <div className="overflow-hidden rounded-xl border border-gray-200">
               <div className="max-h-96 overflow-y-auto">
                 <table className="min-w-full divide-y divide-gray-200">

@@ -231,7 +231,7 @@ const createKPIRatingsTable = () => {
         \`rating\` INT(11) NOT NULL,
         \`ratedByEmployeeId\` INT(11) NOT NULL,
         \`extraRating\` INT(11) NOT NULL,
-  \`feedback\` TEXT NOT NULL,
+        \`feedback\` TEXT NOT NULL,
         \`status\` VARCHAR(50) NOT NULL DEFAULT 'Pending',
         \`created_at\` TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
         \`updated_at\` TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),

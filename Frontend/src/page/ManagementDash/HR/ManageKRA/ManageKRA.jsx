@@ -82,7 +82,7 @@ const ManageKRAs = () => {
     }
   };
 
-  const handleAddNew = async () => {
+  const handleUpdate = async () => {
     if (!editingKraId) {
       toast.warn("Please select a single KRA to update.");
       return;
@@ -208,7 +208,7 @@ const ManageKRAs = () => {
               </button>
 
               <button
-                onClick={handleAddNew}
+                onClick={handleUpdate}
                 className="px-6 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-200 transition-all duration-300"
               >
                 Update

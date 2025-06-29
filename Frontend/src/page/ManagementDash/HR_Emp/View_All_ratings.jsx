@@ -18,7 +18,6 @@ const View_All_ratings = () => {
           withCredentials: true,
         });
         setEmployees(res.data);
-        setFilteredEmployees(res.data);
       } catch (error) {
         console.error("Failed to fetch employees:", error);
       } finally {
@@ -84,7 +83,7 @@ const View_All_ratings = () => {
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Employee ID
+                    Employee Number
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                     Employee Name
@@ -105,7 +104,7 @@ const View_All_ratings = () => {
                   filteredEmployees.map((emp) => (
                     <tr key={emp.employeeId} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {emp.employeeId}
+                        {emp.employeeNumber}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
                         {emp.fullName}

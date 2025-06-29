@@ -4,8 +4,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const OrganizationalForm = () => {
-  const [competency, setCompetency] = useState("");
+const ManageCompetencies = () => {
   const [description, setDescription] = useState("");
   const [isSeniorManager, setIsSeniorManager] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
@@ -45,7 +44,6 @@ const OrganizationalForm = () => {
       console.log("Created:", response.data);
       toast.success("Competency saved successfully!");
 
-      setCompetency("");
       setDescription("");
       setIsSeniorManager(false);
       setSelectedYear("");
@@ -77,10 +75,8 @@ const OrganizationalForm = () => {
 
       toast.success("Competency updated successfully!");
       setDescription("");
-      setIsSeniorManager(false);
       setSelectedIds([]);
       setSelectedCompetency(null);
-      setSelectedYear("");
       fetchCompetencies();
     } catch (error) {
       console.error("Update error:", error);
@@ -133,28 +129,6 @@ const OrganizationalForm = () => {
           Manage Competencies
         </h1>
 
-        {/* Filter Dropdown */}
-        <div className="mb-6">
-          <label
-            htmlFor="filter"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Filter
-          </label>
-          <div className="relative">
-            <select
-              id="filter"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="w-full max-w-xs px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
-            >
-              <option value="all">All</option>
-              <option value="senior">Senior Managers</option>
-              <option value="non-senior">Non-Senior Managers</option>
-            </select>
-          </div>
-        </div>
-
         {/* Competency Form */}
         <div className="mb-6 p-6 bg-white border border-gray-200 rounded-xl shadow-md">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -184,7 +158,7 @@ const OrganizationalForm = () => {
               onChange={(e) => setSelectedYear(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select</option>
+              <option value="">Select year</option>
               <option value="2026">2026</option>
               <option value="2025">2025</option>
               <option value="2024">2024</option>
@@ -227,7 +201,6 @@ const OrganizationalForm = () => {
         </div>
         <div className="mb-6">
           <label
-            htmlFor="yearFilter"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
             Filter by Year
@@ -245,6 +218,27 @@ const OrganizationalForm = () => {
               <option value="2024">2024</option>
               <option value="2023">2023</option>
               <option value="2022">2022</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Filter Dropdown */}
+        <div className="mb-6">
+          <label
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Filter managers
+          </label>
+          <div className="relative">
+            <select
+              id="filter"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full max-w-xs px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+            >
+              <option value="all">All</option>
+              <option value="senior">Senior Managers</option>
+              <option value="non-senior">Except Senior Managers</option>
             </select>
           </div>
         </div>
@@ -281,14 +275,13 @@ const OrganizationalForm = () => {
                             setSelectedCompetency(comp);
                             setDescription(comp.description);
                             setIsSeniorManager(!!comp.isSeniorManager);
-                            setSelectedYear(comp.year); // Set the year field
+                            setSelectedYear(comp.year);
                           } else if (!checked || newSelected.length !== 1) {
                             setSelectedCompetency(null);
                             setDescription("");
                             setIsSeniorManager(false);
                             setSelectedYear("");
                           }
-
                           return newSelected;
                         });
                       }}
@@ -320,4 +313,4 @@ const OrganizationalForm = () => {
   );
 };
 
-export default OrganizationalForm;
+export default ManageCompetencies;

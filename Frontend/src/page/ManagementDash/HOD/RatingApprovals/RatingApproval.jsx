@@ -15,7 +15,6 @@ const RatingApprovals = () => {
   const storedDeptId = localStorage.getItem("departmentId");
   const [selectedDept] = useState(storedDeptId);
 
-
   // Fetch ratings with departmentId filter
   const fetchRatings = async () => {
     setIsLoading(true);
@@ -35,12 +34,17 @@ const RatingApprovals = () => {
   };
 
   useEffect(() => {
-    // Fetch departments
+    fetchRatings();
+  }, [selectedDept]);
+
+  useEffect(() => {
     const fetchDepartments = async () => {
       try {
         const response = await axios.get(
           "http://localhost:5000/api/department",
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
         setDepartments(response.data);
       } catch (error) {
@@ -48,9 +52,8 @@ const RatingApprovals = () => {
       }
     };
 
-    fetchRatings();
     fetchDepartments();
-  }, [selectedDept]); // Re-fetch ratings when selectedDepartment changes
+  }, []); // fetch departments once at mount
 
   // Handle selection of ratings
   const handleSelectRating = (ratingId) => {
@@ -145,23 +148,6 @@ const RatingApprovals = () => {
             <h2 className="text-xl font-semibold">Pending Approvals</h2>
             <div className="mb-4 flex gap-4 items-center">
               <label className="text-sm font-medium text-gray-700">
-                Filter by Department:
-              </label>
-              <select
-                id="department"
-                className="border rounded px-3 py-1 text-sm"
-                value={selectedDept}
-                disabled
-              >
-                <option value="">All Departments</option>
-                {departments.map((dept) => (
-                  <option key={dept.departmentId} value={dept.departmentId}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-
-              <label className="text-sm font-medium text-gray-700">
                 Manager:
               </label>
               <select
@@ -237,7 +223,6 @@ const RatingApprovals = () => {
                     <td className="px-3 py-2">{rating.feedback}</td>
                     <td className="px-3 py-2">{rating.ratedByEmployee}</td>
                     <td className="px-3 py-2">
-                      <td className="px-3 py-2">
                         <input
                           type="number"
                           min="0"
@@ -261,7 +246,6 @@ const RatingApprovals = () => {
                             }
                           }}
                         />
-                      </td>
                     </td>
                     <td className="px-3 py-2">
                       <input

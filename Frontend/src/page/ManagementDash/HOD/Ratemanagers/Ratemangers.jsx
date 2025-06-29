@@ -7,62 +7,57 @@ const RateManagers = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const storedDeptId = localStorage.getItem("departmentId");
-  const [selectedDept, setSelectedDept] = useState(storedDeptId);
+  const [selectedDept] = useState(storedDeptId);
   const [departments, setDepartments] = useState([]);
-
 
   // Fetch employees assigned to the manager
   useEffect(() => {
-  const fetchEmployees = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:5000/api/employees/managers",
-        {
-          withCredentials: true,
-        }
-      );
-      setUsers(response.data);
-    } catch (error) {
-      console.error("Error fetching employees:", error);
-    }
-  };
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/employees/managers",
+          {
+            withCredentials: true,
+          }
+        );
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:5000/api/department",
-        { withCredentials: true }
-      );
-      setDepartments(response.data);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    }
-  };
+    const fetchDepartments = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/department",
+          { withCredentials: true }
+        );
+        setDepartments(response.data);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
 
-  fetchEmployees();
-  fetchDepartments();
-}, []);
-
+    fetchEmployees();
+    fetchDepartments();
+  }, []);
 
   const handleViewClick = (user) => {
-  // Normalize the structure to match the expected format
-  const normalizedUser = {
-    ...user,
-    employeeName: user.fullName, // add this field for consistency
+    // Normalize the structure to match the expected format
+    const normalizedUser = {
+      ...user,
+      employeeName: user.fullName, // add this field for consistency
+    };
+    setSelectedUser(normalizedUser);
   };
-  setSelectedUser(normalizedUser);
-};
-
 
   const handleBack = () => {
     setSelectedUser(null);
   };
 
   const filteredUsers = selectedDept
-  ? users.filter((user) => String(user.departmentId) === String(selectedDept))
-  : users;
-
-
+    ? users.filter((user) => String(user.departmentId) === String(selectedDept))
+    : users;
 
   return (
     <div className="flex min-h-screen bg-gray-200">
@@ -78,24 +73,21 @@ const RateManagers = () => {
             </h1>
 
             <div className="mb-4 flex gap-4 items-center">
-  <label className="text-sm font-medium text-gray-700">
-    Filter by Department:
-  </label>
-  <select
-    className="border rounded px-3 py-1 text-sm"
-    value={selectedDept}
-    disabled
-    
-  >
-    <option value="">All Departments</option>
-    {departments.map((dept) => (
-      <option key={dept.departmentId} value={dept.departmentId}>
-        {dept.name}
-      </option>
-    ))}
-  </select>
-</div>
-
+              <label className="text-sm font-medium text-gray-700">
+                Department:
+              </label>
+              <select
+                className="border rounded px-3 py-1 text-sm"
+                value={selectedDept}
+                disabled
+              >
+                {departments.map((dept) => (
+                  <option key={dept.departmentId} value={dept.departmentId}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="overflow-hidden rounded-xl border border-gray-200">
               <div className="max-h-96 overflow-y-auto">
@@ -127,7 +119,7 @@ const RateManagers = () => {
                             className="bg-black text-white px-4 py-2 rounded-lg"
                             onClick={() => handleViewClick(user)}
                           >
-                            Rate Employee
+                            Rate Manager
                           </button>
                         </td>
                       </tr>

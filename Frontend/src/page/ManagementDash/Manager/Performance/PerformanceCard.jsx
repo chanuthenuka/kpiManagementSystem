@@ -90,7 +90,7 @@ const PerformanceCard = () => {
       }
     };
 
-    const fetchRatings = async () => {
+    const fetchKPIRatings = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5000/api/kpi-ratings/employee/${employeeId}`,
@@ -127,7 +127,7 @@ const PerformanceCard = () => {
       setLoadingKpi(false);
     }
     fetchUser();
-    fetchRatings();
+    fetchKPIRatings();
     fetchCompetencyRatings();
     fetchCompetency();
   }, [employeeId, selectedMonth, selectedYear]); // Added selectedYear to dependencies
@@ -153,8 +153,6 @@ const PerformanceCard = () => {
         const w = ratingObj.weitage / 100;
         actualScore += w * ratingObj.rating;
         actualWeightage += w;
-        // console.log("actualScore", actualScore);
-        // console.log("actualWeightage", actualWeightage);
       }
 
       const w = ratingObj ? ratingObj.weitage / 100 : 0;
@@ -172,53 +170,61 @@ const PerformanceCard = () => {
   }, [kpi, kpiRatings, selectedMonth, selectedYear]);
 
   useEffect(() => {
-  if (!competency.length || !competencyRatings.length) return;
+    if (!competency.length || !competencyRatings.length) return;
 
-  let actualScore = 0;
-  let fullScore = 0;
-  let actualWeightage = 0;
+    let actualScore = 0;
+    let fullScore = 0;
+    let actualWeightage = 0;
 
-  const selectedPeriod = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
-  const totalCompetencyWeightage = 20; // competencies contribute 20%
+    const selectedPeriod = `${selectedYear}-${String(selectedMonth).padStart(
+      2,
+      "0"
+    )}`;
+    const totalCompetencyWeightage = 20; // competencies contribute 20%
 
-  // Count how many competencies were rated in the selected period
-  const ratedCount = competency.filter((c) =>
-    competencyRatings.find(
-      (r) => r.competencyId === c.competencyId && r.month === selectedPeriod && typeof r.rating === "number"
-    )
-  ).length;
+    // Count how many competencies were rated in the selected period
+    const ratedCount = competency.filter((c) =>
+      competencyRatings.find(
+        (r) =>
+          r.competencyId === c.competencyId &&
+          r.month === selectedPeriod &&
+          typeof r.rating === "number"
+      )
+    ).length;
 
-  const perCompetencyWeight = ratedCount > 0 ? totalCompetencyWeightage / ratedCount / 100 : 0;
+    const perCompetencyWeight =
+      ratedCount > 0 ? totalCompetencyWeightage / ratedCount / 100 : 0;
 
-  competency.forEach((c) => {
-    const ratingObj = competencyRatings.find(
-      (r) => r.competencyId === c.competencyId && r.month === selectedPeriod
-    );
+    competency.forEach((c) => {
+      const ratingObj = competencyRatings.find(
+        (r) => r.competencyId === c.competencyId && r.month === selectedPeriod
+      );
 
-    const rating = ratingObj && typeof ratingObj.rating === "number" ? Number(ratingObj.rating) : 0;
+      const rating =
+        ratingObj && typeof ratingObj.rating === "number"
+          ? Number(ratingObj.rating)
+          : 0;
 
-    // Only count actual ratings (not zero) for actualScore
-    if (rating > 0) {
-      actualScore += perCompetencyWeight/100 * rating;
-      actualWeightage += perCompetencyWeight;
-    }
+      // Only count actual ratings (not zero) for actualScore
+      if (rating > 0) {
+        actualScore += (perCompetencyWeight / 100) * rating;
+        actualWeightage += perCompetencyWeight;
+      }
 
-    // Full score includes all, rated or not (0 if not rated)
-    fullScore += perCompetencyWeight * rating;
-  });
+      // Full score includes all, rated or not (0 if not rated)
+      fullScore += perCompetencyWeight * rating;
+    });
 
-  const normalizedActual =
-    actualWeightage > 0
-      ? (actualScore / actualWeightage) * totalCompetencyWeightage
-      : 0;
+    const normalizedActual =
+      actualWeightage > 0
+        ? (actualScore / actualWeightage) * totalCompetencyWeightage
+        : 0;
 
-  const normalizedFull = fullScore; // already out of 20%
+    const normalizedFull = fullScore; // already out of 20%
 
-  setActualComScore(Number(normalizedActual.toFixed(2)));
-  setFullComScore(Number(normalizedFull.toFixed(2)));
-}, [competencyRatings, competency, selectedMonth, selectedYear]);
-
-
+    setActualComScore(Number(normalizedActual.toFixed(2)));
+    setFullComScore(Number(normalizedFull.toFixed(2)));
+  }, [competencyRatings, competency, selectedMonth, selectedYear]);
 
   // Filter ratings based on selectedMonth and selectedYear
   const filteredKpiRatings = kpiRatings.filter((item) => {
@@ -257,7 +263,7 @@ const PerformanceCard = () => {
         kpiDescription: item.kpiDescription,
         target: item.target,
         tasks: item.tasks,
-        weightage: item.weightage || "2", // Default to 2% if not provided
+        weightage: item.weitage,
         Q1: [],
         Q2: [],
         Q3: [],
@@ -279,7 +285,7 @@ const PerformanceCard = () => {
       acc[key] = {
         competencyId: item.competencyId,
         competencyDescription: item.competencyDescription,
-        weightage: item.weightage || "20", // Default to 20% if not provided
+        weightage: item.weightage,
         Q1: [],
         Q2: [],
         Q3: [],
@@ -297,7 +303,7 @@ const PerformanceCard = () => {
   // Calculate average rating for a quarter
   const calculateAverage = (ratings) =>
     ratings.length
-      ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1)
+      ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(2)
       : "-";
 
   // Handle opening and closing the modal
@@ -503,7 +509,7 @@ const PerformanceCard = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-800">
                       {item.month}
-                    </td>                    
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-800">
                       {item.feedback || "No feedback provided"}
                     </td>
@@ -514,7 +520,6 @@ const PerformanceCard = () => {
           )}
           {/* Display Actual and Full Scores */}
           <div className="mt-4 flex space-x-8">
-            
             <div>
               <span className="text-sm font-semibold text-gray-700">
                 Full Score:
@@ -548,7 +553,7 @@ const PerformanceCard = () => {
                 >
                   ×
                 </button>
-              </div>
+              </div>   
 
               {/* KPI Quarterly Ratings Table */}
               <div className="mb-6">

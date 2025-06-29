@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 const KPIChangetable = ({ refresh }) => {
   const [requests, setRequests] = useState([]);
+  const departmentId = localStorage.getItem("departmentId");
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/approve-kpi/get-by-names", // Uses updated JOIN route
+          "http://localhost:5000/api/approve-kpi/get-by-names",
           { withCredentials: true }
         );
-        setRequests(response.data);
+        const filtered = response.data.filter(
+          (item) => String(item.departmentId) === String(departmentId)
+        );
+
+        setRequests(filtered);
       } catch (error) {
         console.error("Failed to fetch KPI change requests:", error);
       }

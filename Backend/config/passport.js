@@ -1,5 +1,5 @@
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
-const db = require('../db/db'); // replace with your db logic
+const db = require('../db/db');
 const secret = process.env.JWT_SECRET || 'secret';
 
 const opts = {

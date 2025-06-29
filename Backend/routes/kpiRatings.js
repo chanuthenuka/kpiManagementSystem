@@ -4,7 +4,6 @@ const db = require("../db/db");
 const passport = require("passport");
 const authorizePermissions = require("../middlewares/authMiddleware");
 
-
 // Protect all routes
 router.use(passport.authenticate("jwt", { session: false }));
 
@@ -122,7 +121,7 @@ WHERE
     kpr.employeeId = ? 
     AND kpr.deleted_at IS NULL 
     AND kpr.status = 'approve'
-        ORDER BY kpi.kraId, kpr.kpiId;;
+        ORDER BY kpi.kraId, kpr.kpiId;
 
         `;
 
@@ -141,13 +140,11 @@ WHERE
 );
 
 // Get yearly KPI rating summary for an employee
-router.get(
-  "/employee/:employeeId/year/:year",
-  async (req, res) => {
-    const { employeeId, year } = req.params;
+router.get("/employee/:employeeId/year/:year", async (req, res) => {
+  const { employeeId, year } = req.params;
 
-    try {
-      const sql = `
+  try {
+    const sql = `
         SELECT 
     kra.description AS KRA,
     kpi.description AS KPI,
@@ -374,34 +371,52 @@ ORDER BY kra.kraId, kpi.kpiId;
 
       `;
 
-      const params = [
-        year, employeeId, year, employeeId, year, employeeId,
-        year, employeeId, year, employeeId, year, employeeId,
-        year, employeeId, year, employeeId, year, employeeId,
-        year, employeeId, year, employeeId, year, employeeId,
-        year,  // for kra.year = ?
-  employeeId // for EXISTS subquery
-      ];
+    const params = [
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year,
+      employeeId,
+      year, // for kra.year = ?
+      employeeId, // for EXISTS subquery
+    ];
 
-      db.query(sql, params, (err, results) => {
-        if (err) {
-          console.error("Query error:", err);
-          return res.status(500).json({ error: "Internal Server Error" });
-        }
-        res.json(results);
-      });
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    db.query(sql, params, (err, results) => {
+      if (err) {
+        console.error("Query error:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      res.json(results);
+    });
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-);
-
+});
 
 // Create a KPI rating
 router.post(
   "/",
-  authorizePermissions(["Rate Employees", "Approve Ratings", "Rate Managers"]),
+  authorizePermissions(["Rate Employees", "Approve Ratings", "Rate Managers", "Rate Trainees"]),
   async (req, res) => {
     const ratings = req.body; // Assuming the payload is an array of rating objects
 
@@ -475,12 +490,12 @@ router.put(
   authorizePermissions(["Get All Kpi Ratings"]),
   async (req, res) => {
     const { id } = req.params;
-    const { rating, status } = req.body; // Accept status as well
+    const { rating, status, feedback } = req.body; // Accept status as well
 
     try {
       const sql =
-        "UPDATE KPIRatings SET rating = ?, status = ? WHERE kpiRatingId = ? AND deleted_at IS NULL";
-      db.query(sql, [rating, status, id], (err, result) => {
+        "UPDATE KPIRatings SET rating = ?, status = ?, feedback = ? WHERE kpiRatingId = ? AND deleted_at IS NULL";
+      db.query(sql, [rating, status, feedback, id], (err, result) => {
         if (err) throw err;
         if (result.affectedRows > 0) {
           res.json({ message: "KPI rating updated successfully" });
